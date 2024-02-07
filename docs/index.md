@@ -23,4 +23,9 @@ provider "adaptive-metrics" {
 
 ### Optional
 
-- `endpoint` (String) Example provider attribute
+- `api_key` (String, Sensitive) Access Policy Token (or API key) for Grafana Cloud. May alternatively be set via the `GRAFANA_CLOUD_API_KEY` environment variable.
+- `http_headers` (Map of String, Sensitive) HTTP headers mapping keys to values used for accessing Grafana Cloud APIs. May alternatively be set via the `GRAFANA_CLOUD_HTTP_HEADERS` environment variable in JSON format.
+- `retries` (Number) The amount of retries to use for Grafana API and Grafana Cloud API calls. Defaults to 3. May alternatively be set via the `GRAFANA_CLOUD_RETRIES` environment variable.
+- `retry_status_codes` (Set of String) The status codes to retry on for Grafana API and Grafana Cloud API calls. Use `x` as a digit wildcard. Defaults to 429 and 5xx. May alternatively be set via the `GRAFANA_CLOUD_RETRY_STATUS_CODES` environment variable.
+- `retry_wait` (Number) The amount of time in seconds to wait between retries for Grafana Cloud API calls. May alternatively be set via the `GRAFANA_CLOUD_RETRY_WAIT` environment variable.
+- `url` (String) Grafana Cloud's API URL. May alternatively be set via the `GRAFANA_CLOUD_API_URL` environment variable.
