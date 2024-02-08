@@ -11,9 +11,9 @@ on:
     paths-ignore:
       - 'README.md'
 
-# Testing only needs permissions to read the repository contents.
 permissions:
-  contents: read
+  contents: read  # Testing only needs permissions to read the repository contents.
+  id-token: write # Needed to assume roles from Github's OIDC.
 
 jobs:
   # Ensure project builds before running testing matrix
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
-      fail-fast: false
+      max-parallel: 1
       matrix:
         # list whatever Terraform versions here you would like to support
         terraform:
@@ -74,6 +74,11 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
+      - uses: grafana/shared-workflows/actions/get-vault-secrets@main
+        with:
+          repo_secrets: |
+            GRAFANA_CLOUD_API_URL=cloud-tests:api-url
+            GRAFANA_CLOUD_API_KEY=cloud-tests:api-key
       - run: go mod download
       - env:
           TF_ACC: "1"
