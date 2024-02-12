@@ -14,7 +14,8 @@ description: |-
 
 ```terraform
 provider "adaptive-metrics" {
-  # example configuration here
+  url     = "example.grafana.com"
+  api_key = "my-token"
 }
 ```
 
