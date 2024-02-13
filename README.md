@@ -41,6 +41,22 @@ provider_installation {
 }
 ```
 
+### Debugging the provider
+
+1. Build the provider:
+    ```
+    go build -gcflags "all=-N -l" -o terraform-provider-adaptive-metrics .
+   ```
+2. Run w/ delve:
+    ```
+    dlv exec --accept-multiclient --listen=:2345 --continue --headless ./terraform-provider-adaptive-metrics -- -debug`
+    ```
+3. Connect your IDE debugger to the delve instance (listening on port 2345).
+4. The `dlv` command will output something that starts with `TF_REATTACH_PROVIDERS`; prepend that to the terraform command you're testing. For example:
+    ```
+   TF_REATTACH_PROVIDERS='{"registry.terraform.io/my-org/my-provider":{"Protocol":"grpc","Pid":3382870,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin713096927"}}}' terraform plan
+    ```
+
 ### Running acceptance tests
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
