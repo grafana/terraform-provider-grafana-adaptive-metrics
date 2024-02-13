@@ -53,30 +53,35 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"metric": schema.StringAttribute{
-				Required: true,
+				Required:    true,
+				Description: "The name of the metric to be aggregated.",
 			},
 			"match_type": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(""),
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+				Description: "Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.",
 			},
 
 			"drop": schema.BoolAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  defaultBoolFalse{},
+				Optional:    true,
+				Computed:    true,
+				Default:     defaultBoolFalse{},
+				Description: "Set to true to skip both ingestion and aggregation and drop the metric entirely.",
 			},
 			"keep_labels": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
 				Default:     defaultEmptyList{},
+				Description: "The array of labels to keep; labels not in this array will be aggregated.",
 			},
 			"drop_labels": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
 				Default:     defaultEmptyList{},
+				Description: "The array of labels that will be aggregated.",
 			},
 
 			"aggregations": schema.ListAttribute{
@@ -84,23 +89,27 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Optional:    true,
 				Computed:    true,
 				Default:     defaultEmptyList{},
+				Description: "The array of aggregation types to calculate for this metric.",
 			},
 
 			"aggregation_interval": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(""),
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+				Description: "The interval at which to generate the aggregated series.",
 			},
 			"aggregation_delay": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(""),
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+				Description: "The delay until aggregation is performed.",
 			},
 
 			"ingest": schema.BoolAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  defaultBoolFalse{},
+				Optional:    true,
+				Computed:    true,
+				Default:     defaultBoolFalse{},
+				Description: "Also ingest the raw series alongside the aggregated series. Note that this will increase your overall cost and is for troubleshooting purposes only.",
 			},
 		},
 	}
