@@ -26,10 +26,12 @@ func (e Exemption) ToTF() ExemptionTF {
 
 type ExemptionTF struct {
 	ID         types.String   `tfsdk:"id"`
-	Metric     types.String   `tfsdk:"metric,omitempty"`
-	KeepLabels []types.String `tfsdk:"keep_labels,omitempty"`
-	CreatedAt  types.Int64    `tfsdk:"created_at,omitempty"`
-	UpdatedAt  types.Int64    `tfsdk:"updated_at,omitempty"`
+	Metric     types.String   `tfsdk:"metric"`
+	KeepLabels []types.String `tfsdk:"keep_labels"`
+	CreatedAt  types.Int64    `tfsdk:"created_at"`
+	UpdatedAt  types.Int64    `tfsdk:"updated_at"`
+
+	LastUpdated types.String `tfsdk:"-"`
 }
 
 func (e ExemptionTF) ToAPIReq() Exemption {

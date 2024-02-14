@@ -36,7 +36,7 @@ func (c *Client) ReadExemption(exID string) (model.Exemption, error) {
 	return resp.Result, err
 }
 
-func (c *Client) UpdateExemption(ex model.ExemptionTF) error {
+func (c *Client) UpdateExemption(ex model.Exemption) error {
 	body, err := json.Marshal(ex)
 	if err != nil {
 		return err

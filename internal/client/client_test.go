@@ -3,6 +3,7 @@ package client
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -276,4 +277,101 @@ func TestDeleteAggregationRule(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)
+}
+
+func TestCreateExemption(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	reqBody := []byte(`{"id":"","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}`)
+	respBody := []byte(`{"result":{"id":"generated-ulid","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}}`)
+
+	s.addExpected(
+		"POST", "/v1/recommendations/exemptions", nil, reqBody,
+		nil, respBody,
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.CreateExemption(model.Exemption{
+		Metric:     "test_metric",
+		KeepLabels: []string{"foobar"},
+	})
+	require.NoError(t, err)
+
+	expected := model.Exemption{
+		ID:         "generated-ulid",
+		Metric:     "test_metric",
+		KeepLabels: []string{"foobar"},
+		CreatedAt:  time.Time{},
+		UpdatedAt:  time.Time{},
+	}
+
+	require.Equal(t, expected, actual)
+}
+
+func TestReadExemption(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	respBody := []byte(`{"result":{"id":"generated-ulid","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}}`)
+	expected := model.Exemption{
+		ID:         "generated-ulid",
+		Metric:     "test_metric",
+		KeepLabels: []string{"foobar"},
+		CreatedAt:  time.Time{},
+		UpdatedAt:  time.Time{},
+	}
+
+	s.addExpected(
+		"GET", "/v1/recommendations/exemptions/generated-ulid", nil, nil,
+		nil, respBody,
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.ReadExemption("generated-ulid")
+	require.NoError(t, err)
+
+	require.Equal(t, expected, actual)
+}
+
+func TestUpdateExemption(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	reqBody := []byte(`{"id":"generated-ulid","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}`)
+
+	s.addExpected(
+		"PUT", "/v1/recommendations/exemptions/generated-ulid", nil, reqBody,
+		nil, nil,
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	err = c.UpdateExemption(model.Exemption{
+		ID:         "generated-ulid",
+		Metric:     "test_metric",
+		KeepLabels: []string{"foobar"},
+	})
+	require.NoError(t, err)
+}
+
+func TestDeleteExemption(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	s.addExpected(
+		"DELETE", "/v1/recommendations/exemptions/generated-ulid", nil, nil,
+		nil, nil,
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	err = c.DeleteExemption("generated-ulid")
+	require.NoError(t, err)
 }
