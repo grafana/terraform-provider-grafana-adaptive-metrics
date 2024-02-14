@@ -53,8 +53,6 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required:    false,
-				Optional:    false,
 				Computed:    true,
 				Description: "A UILD that uniquely identifies the exemption.",
 			},
@@ -70,14 +68,10 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Description: "The array of labels to keep; labels not in this array will be aggregated.",
 			},
 			"created_at": schema.Int64Attribute{
-				Required:    false,
-				Optional:    false,
 				Computed:    true,
 				Description: "Unix timestamp of when this exemption was created.",
 			},
 			"updated_at": schema.Int64Attribute{
-				Required:    false,
-				Optional:    false,
 				Computed:    true,
 				Description: "Unix timestamp of when this exemption was last updated.",
 			},

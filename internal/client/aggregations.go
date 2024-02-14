@@ -15,7 +15,7 @@ const (
 
 func (c *Client) AggregationRules() ([]model.AggregationRule, string, error) {
 	var rules []model.AggregationRule
-	header, err := c.requestWithHeaders("GET", aggregationRulesEndpoint, nil, nil, nil, &rules)
+	header, err := c.requestWithHeaders("GET", aggregationRulesEndpoint, nil, nil, &rules)
 	if err != nil {
 		return rules, "", err
 	}
@@ -37,7 +37,7 @@ func (c *Client) UpdateAggregationRules(rules []model.AggregationRule, etag stri
 	reqHeader := make(http.Header)
 	reqHeader.Add("If-Match", etag)
 
-	respHeader, err := c.requestWithHeaders("POST", aggregationRulesEndpoint, nil, reqHeader, body, nil)
+	respHeader, err := c.requestWithHeaders("POST", aggregationRulesEndpoint, reqHeader, body, nil)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func (c *Client) CreateAggregationRule(rule model.AggregationRule, etag string) 
 
 	endpoint := fmt.Sprintf(aggregationRuleEndpoint, rule.Metric)
 
-	respHeader, err := c.requestWithHeaders("POST", endpoint, nil, reqHeader, body, nil)
+	respHeader, err := c.requestWithHeaders("POST", endpoint, reqHeader, body, nil)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +78,7 @@ func (c *Client) ReadAggregationRule(metric string) (model.AggregationRule, stri
 	rule := model.AggregationRule{}
 	endpoint := fmt.Sprintf(aggregationRuleEndpoint, metric)
 
-	respHeader, err := c.requestWithHeaders("GET", endpoint, nil, nil, nil, &rule)
+	respHeader, err := c.requestWithHeaders("GET", endpoint, nil, nil, &rule)
 	if err != nil {
 		return rule, "", err
 	}
@@ -102,7 +102,7 @@ func (c *Client) UpdateAggregationRule(rule model.AggregationRule, etag string) 
 
 	endpoint := fmt.Sprintf(aggregationRuleEndpoint, rule.Metric)
 
-	respHeader, err := c.requestWithHeaders("PUT", endpoint, nil, reqHeader, body, nil)
+	respHeader, err := c.requestWithHeaders("PUT", endpoint, reqHeader, body, nil)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +121,7 @@ func (c *Client) DeleteAggregationRule(metric, etag string) (string, error) {
 
 	endpoint := fmt.Sprintf(aggregationRuleEndpoint, metric)
 
-	respHeader, err := c.requestWithHeaders("DELETE", endpoint, nil, reqHeader, nil, nil)
+	respHeader, err := c.requestWithHeaders("DELETE", endpoint, reqHeader, nil, nil)
 	if err != nil {
 		return "", err
 	}

@@ -13,13 +13,13 @@ const (
 
 func (c *Client) AggregationRecommendations() ([]model.AggregationRecommendation, error) {
 	var recs []model.AggregationRecommendation
-	err := c.request("GET", recommendationsEndpoint, nil, nil, &recs)
+	err := c.request("GET", recommendationsEndpoint, nil, &recs)
 	return recs, err
 }
 
 func (c *Client) AggregationRecommendationsConfig() (model.AggregationRecommendationConfiguration, error) {
 	config := model.AggregationRecommendationConfiguration{}
-	err := c.request("GET", recommendationsConfigEndpoint, nil, nil, &config)
+	err := c.request("GET", recommendationsConfigEndpoint, nil, &config)
 	return config, err
 }
 
@@ -29,5 +29,5 @@ func (c *Client) UpdateAggregationRecommendationsConfig(config model.Aggregation
 		return err
 	}
 
-	return c.request("POST", recommendationsConfigEndpoint, nil, body, nil)
+	return c.request("POST", recommendationsConfigEndpoint, body, nil)
 }

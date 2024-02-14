@@ -51,12 +51,12 @@ func New(baseURL string, cfg *Config) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) request(method, requestPath string, query url.Values, body []byte, responseStruct interface{}) error {
-	_, err := c.requestWithHeaders(method, requestPath, query, nil, body, responseStruct)
+func (c *Client) request(method, requestPath string, body []byte, responseStruct interface{}) error {
+	_, err := c.requestWithHeaders(method, requestPath, nil, body, responseStruct)
 	return err
 }
 
-func (c *Client) requestWithHeaders(method, requestPath string, query url.Values, header http.Header, body []byte, responseStruct interface{}) (http.Header, error) {
+func (c *Client) requestWithHeaders(method, requestPath string, header http.Header, body []byte, responseStruct interface{}) (http.Header, error) {
 	var (
 		req          *http.Request
 		resp         *http.Response
@@ -66,7 +66,7 @@ func (c *Client) requestWithHeaders(method, requestPath string, query url.Values
 
 	// retry logic
 	for n := 0; n <= c.Cfg.NumRetries; n++ {
-		req, err = c.newRequest(method, requestPath, query, header, bytes.NewReader(body))
+		req, err = c.newRequest(method, requestPath, header, bytes.NewReader(body))
 		if err != nil {
 			return nil, err
 		}
@@ -135,10 +135,9 @@ func (c *Client) requestWithHeaders(method, requestPath string, query url.Values
 	return resp.Header, nil
 }
 
-func (c *Client) newRequest(method, requestPath string, query url.Values, header http.Header, body io.Reader) (*http.Request, error) {
+func (c *Client) newRequest(method, requestPath string, header http.Header, body io.Reader) (*http.Request, error) {
 	u := c.BaseURL
 	u.Path = path.Join(u.Path, requestPath)
-	u.RawQuery = query.Encode()
 	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
 		return req, err
