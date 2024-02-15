@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/model"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/model"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 var (

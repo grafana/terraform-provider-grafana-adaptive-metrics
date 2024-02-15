@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-adaptive-metrics
+module github.com/hashicorp/terraform-provider-grafana-adaptive-metrics
 
 go 1.21
 

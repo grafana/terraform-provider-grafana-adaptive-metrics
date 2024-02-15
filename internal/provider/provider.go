@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/client"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 )
 
 // Ensure AdaptiveMetricsProvider satisfies various provider interfaces.
@@ -71,7 +71,7 @@ func getIntOverriddenByEnvOrDefault(s types.Int64, envKey string, valDefault int
 }
 
 func (p *AdaptiveMetricsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "adaptive-metrics"
+	resp.TypeName = "grafana-adaptive-metrics"
 	resp.Version = p.version
 }
 

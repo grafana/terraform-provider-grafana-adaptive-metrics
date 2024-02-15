@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/model"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 type ruleResource struct {

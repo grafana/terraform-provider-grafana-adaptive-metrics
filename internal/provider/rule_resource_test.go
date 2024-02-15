@@ -18,26 +18,26 @@ func TestAccRuleResource(t *testing.T) {
 			// Create + Read.
 			{
 				Config: providerConfig + fmt.Sprintf(`
-resource "adaptive-metrics_rule" "test" {
+resource "grafana-adaptive-metrics_rule" "test" {
 	metric = "%s"
 	drop = true
 }
 `, metricName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "metric", metricName),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "match_type", ""),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "drop", "true"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "keep_labels.#", "0"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "drop_labels.#", "0"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregations.#", "0"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregation_interval", ""),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregation_delay", ""),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "ingest", "false"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "metric", metricName),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "match_type", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "keep_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "ingest", "false"),
 				),
 			},
 			// ImportState.
 			{
-				ResourceName:                         "adaptive-metrics_rule.test",
+				ResourceName:                         "grafana-adaptive-metrics_rule.test",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        metricName,
@@ -50,7 +50,7 @@ resource "adaptive-metrics_rule" "test" {
 			// Update + Read.
 			{
 				Config: providerConfig + fmt.Sprintf(`
-resource "adaptive-metrics_rule" "test" {
+resource "grafana-adaptive-metrics_rule" "test" {
 	metric = "%s"
 	match_type = "prefix"
 	drop_labels = [ "instance" ]
@@ -59,17 +59,17 @@ resource "adaptive-metrics_rule" "test" {
 }
 `, metricName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "metric", metricName),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "match_type", "prefix"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "drop", "false"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "keep_labels.#", "0"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "drop_labels.#", "1"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "drop_labels.0", "instance"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregations.#", "1"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregations.0", "sum"),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregation_interval", ""),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "aggregation_delay", ""),
-					resource.TestCheckResourceAttr("adaptive-metrics_rule.test", "ingest", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "metric", metricName),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "match_type", "prefix"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop", "false"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "keep_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.0", "instance"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.0", "sum"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "ingest", "true"),
 				),
 			},
 			// Delete happens automatically.
