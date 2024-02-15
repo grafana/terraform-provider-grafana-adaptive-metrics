@@ -15,20 +15,20 @@ func TestAccExemptionResource(t *testing.T) {
 			// Create + Read.
 			{
 				Config: providerConfig + `
-resource "adaptive-metrics_exemption" "test" {
+resource "grafana-adaptive-metrics_exemption" "test" {
 	metric = "test_tf_metric"
 	keep_labels = ["namespace"]
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "metric", "test_tf_metric"),
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "keep_labels.#", "1"),
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "metric", "test_tf_metric"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
 				),
 			},
 			// ImportState.
 			{
-				ResourceName:      "adaptive-metrics_exemption.test",
+				ResourceName:      "grafana-adaptive-metrics_exemption.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 				// The last_updated attribute does not exist in the
@@ -39,16 +39,16 @@ resource "adaptive-metrics_exemption" "test" {
 			// Update + Read.
 			{
 				Config: providerConfig + `
-resource "adaptive-metrics_exemption" "test" {
+resource "grafana-adaptive-metrics_exemption" "test" {
 	metric = "test_tf_metric"
 	keep_labels = ["namespace", "cluster"]
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "metric", "test_tf_metric"),
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "keep_labels.#", "2"),
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
-					resource.TestCheckResourceAttr("adaptive-metrics_exemption.test", "keep_labels.1", "cluster"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "metric", "test_tf_metric"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.#", "2"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.1", "cluster"),
 				),
 			},
 			// Delete happens automatically.

@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/model"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 func main() {
@@ -35,11 +35,11 @@ func main() {
 		cleanMetricName := strings.ReplaceAll(rule.Metric, ":", "_")
 
 		fmt.Println("import {")
-		fmt.Printf("  to = adaptive-metrics_rule.%s\n", cleanMetricName)
+		fmt.Printf("  to = grafana-adaptive-metrics_rule.%s\n", cleanMetricName)
 		fmt.Printf("  id = \"%s\"\n", rule.Metric)
 		fmt.Println("}")
 		fmt.Println()
-		fmt.Printf("resource \"adaptive-metrics_rule\" \"%s\" {\n", cleanMetricName)
+		fmt.Printf("resource \"grafana-adaptive-metrics_rule\" \"%s\" {\n", cleanMetricName)
 		fmt.Printf("  metric               = \"%s\"\n", rule.Metric)
 		if rule.MatchType != "" {
 			fmt.Printf("  match_type           = \"%s\"\n", rule.MatchType)

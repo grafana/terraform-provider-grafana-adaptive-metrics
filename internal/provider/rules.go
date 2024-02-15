@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/client"
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/model"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 type AggregationRules struct {

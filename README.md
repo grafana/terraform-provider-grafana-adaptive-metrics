@@ -2,7 +2,7 @@ _# Terraform Provider for Grafana Adaptive Metrics
 
 - Grafana website: https://grafana.com
 - Grafana Cloud website: https://grafana.com/products/cloud/
-- Grafana Adaptive Metrics website: https://grafana.com/docs/grafana-cloud/cost-management-and-billing/reduce-costs/metrics-costs/control-metrics-usage-via-adaptive-metrics/
+- Grafana Adaptive Metrics website: https://grafana.com/docs/grafana-cloud/cost-management-and-billing/reduce-costs/metrics-costs/control-metrics-usage-via-grafana-adaptive-metrics/
 
 ## Requirements
 
@@ -31,7 +31,7 @@ Add the following to your `.terraformrc` to test with a local version of the pro
 ```
 provider_installation {
   dev_overrides {
-      "registry.terraform.io/grafana/adaptive-metrics" = "/$GOPATH/bin"
+      "registry.terraform.io/grafana/grafana-adaptive-metrics" = "/$GOPATH/bin"
   }
 
   # For all other providers, install them directly from their origin provider
@@ -45,11 +45,11 @@ provider_installation {
 
 1. Build the provider:
     ```
-    go build -gcflags "all=-N -l" -o terraform-provider-adaptive-metrics .
+    go build -gcflags "all=-N -l" -o terraform-provider-grafana-adaptive-metrics .
    ```
 2. Run w/ delve:
     ```
-    dlv exec --accept-multiclient --listen=:2345 --continue --headless ./terraform-provider-adaptive-metrics -- -debug`
+    dlv exec --accept-multiclient --listen=:2345 --continue --headless ./terraform-provider-grafana-adaptive-metrics -- -debug`
     ```
 3. Connect your IDE debugger to the delve instance (listening on port 2345).
 4. The `dlv` command will output something that starts with `TF_REATTACH_PROVIDERS`; prepend that to the terraform command you're testing. For example:

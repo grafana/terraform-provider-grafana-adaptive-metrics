@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/hashicorp/terraform-provider-adaptive-metrics/internal/model"
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 const (
