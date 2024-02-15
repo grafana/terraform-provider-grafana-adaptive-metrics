@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	// We expect the GRAFANA_CLOUD_API_URL and GRAFANA_CLOUD_API_URL env vars to be populated.
+	// We expect the GRAFANA_AM_API_URL and GRAFANA_AM_API_URL env vars to be populated.
 	providerConfig = `provider "grafana-adaptive-metrics" {}`
 )
 

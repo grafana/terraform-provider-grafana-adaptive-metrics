@@ -65,7 +65,7 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 make testacc
 ```
 
-Acceptance tests expect the `GRAFANA_CLOUD_API_URL` and `GRAFANA_CLOUD_API_KEY` environment variables to be set.
+Acceptance tests expect the `GRAFANA_AM_API_URL` and `GRAFANA_AM_API_KEY` environment variables to be set.
 
 ### Updating documentation
 

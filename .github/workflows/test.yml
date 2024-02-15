@@ -77,8 +77,8 @@ jobs:
       - uses: grafana/shared-workflows/actions/get-vault-secrets@main
         with:
           repo_secrets: |
-            GRAFANA_CLOUD_API_URL=cloud-tests:api-url
-            GRAFANA_CLOUD_API_KEY=cloud-tests:api-key
+            GRAFANA_AM_API_URL=cloud-tests:api-url
+            GRAFANA_AM_API_KEY=cloud-tests:api-key
       - run: go mod download
       - env:
           TF_ACC: "1"
