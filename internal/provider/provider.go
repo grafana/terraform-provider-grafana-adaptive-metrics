@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
-	"time"
 
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -34,12 +34,11 @@ type AdaptiveMetricsProvider struct {
 
 // AdaptiveMetricsProviderModel describes the provider data model.
 type AdaptiveMetricsProviderModel struct {
-	URL              types.String `tfsdk:"url"`
-	APIKey           types.String `tfsdk:"api_key"`
-	HTTPHeaders      types.Map    `tfsdk:"http_headers"`
-	Retries          types.Int64  `tfsdk:"retries"`
-	RetryStatusCodes types.Set    `tfsdk:"retry_status_codes"`
-	RetryWait        types.Int64  `tfsdk:"retry_wait"`
+	URL         types.String `tfsdk:"url"`
+	APIKey      types.String `tfsdk:"api_key"`
+	HTTPHeaders types.Map    `tfsdk:"http_headers"`
+	Retries     types.Int64  `tfsdk:"retries"`
+	Debug       types.Bool   `tfsdk:"debug"`
 
 	UserAgent types.String `json:"-" tfsdk:"-"`
 }
@@ -70,6 +69,19 @@ func getIntOverriddenByEnvOrDefault(s types.Int64, envKey string, valDefault int
 	return valDefault, nil
 }
 
+func getBooleanOverriddenByEnvOrDefault(s types.Bool, envKey string, valDefault bool) (bool, error) {
+	val, ok := os.LookupEnv(envKey)
+	if ok {
+		return strconv.ParseBool(val)
+	}
+
+	if !s.IsNull() {
+		return s.ValueBool(), nil
+	}
+
+	return valDefault, nil
+}
+
 func (p *AdaptiveMetricsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "grafana-adaptive-metrics"
 	resp.Version = p.version
@@ -80,31 +92,26 @@ func (p *AdaptiveMetricsProvider) Schema(_ context.Context, _ provider.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Grafana Cloud's API URL. May alternatively be set via the `GRAFANA_CLOUD_API_URL` environment variable.",
+				MarkdownDescription: "Grafana Cloud's API URL. May alternatively be set via the `GRAFANA_AM_API_URL` environment variable.",
 			},
 			"api_key": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Access Policy Token (or API key) for Grafana Cloud. May alternatively be set via the `GRAFANA_CLOUD_API_KEY` environment variable.",
+				MarkdownDescription: "Access Policy Token (or API key) for Grafana Cloud. May alternatively be set via the `GRAFANA_AM_API_KEY` environment variable.",
 			},
 			"http_headers": schema.MapAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "HTTP headers mapping keys to values used for accessing Grafana Cloud APIs. May alternatively be set via the `GRAFANA_CLOUD_HTTP_HEADERS` environment variable in JSON format.",
+				MarkdownDescription: "HTTP headers mapping keys to values used for accessing Grafana Cloud APIs. May alternatively be set via the `GRAFANA_AM_HTTP_HEADERS` environment variable in JSON format.",
 				ElementType:         types.StringType,
 			},
 			"retries": schema.Int64Attribute{
 				Optional:            true,
-				MarkdownDescription: "The amount of retries to use for Grafana API and Grafana Cloud API calls. Defaults to 3. May alternatively be set via the `GRAFANA_CLOUD_RETRIES` environment variable.",
+				MarkdownDescription: "The amount of retries to use for Grafana API and Grafana Cloud API calls. Defaults to 3. May alternatively be set via the `GRAFANA_AM_RETRIES` environment variable.",
 			},
-			"retry_status_codes": schema.SetAttribute{
+			"debug": schema.BoolAttribute{
 				Optional:            true,
-				MarkdownDescription: "The status codes to retry on for Grafana API and Grafana Cloud API calls. Use `x` as a digit wildcard. Defaults to 429 and 5xx. May alternatively be set via the `GRAFANA_CLOUD_RETRY_STATUS_CODES` environment variable.",
-				ElementType:         types.StringType,
-			},
-			"retry_wait": schema.Int64Attribute{
-				Optional:            true,
-				MarkdownDescription: "The amount of time in seconds to wait between retries for Grafana Cloud API calls. May alternatively be set via the `GRAFANA_CLOUD_RETRY_WAIT` environment variable.",
+				MarkdownDescription: "Whether to enable debug logging. Defaults to false.",
 			},
 		},
 	}
@@ -117,41 +124,28 @@ func (p *AdaptiveMetricsProvider) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	apiURL := getStringOverriddenByEnvOrDefault(cfg.URL, "GRAFANA_CLOUD_API_URL", "")
+	apiURL := getStringOverriddenByEnvOrDefault(cfg.URL, "GRAFANA_AM_API_URL", "")
 	if apiURL == "" {
 		resp.Diagnostics.AddError("Missing required attribute", "url")
 		return
 	}
 
-	apiKey := getStringOverriddenByEnvOrDefault(cfg.APIKey, "GRAFANA_CLOUD_API_KEY", "")
-	retries, err := getIntOverriddenByEnvOrDefault(cfg.Retries, "GRAFANA_CLOUD_RETRIES", 3)
+	apiKey := getStringOverriddenByEnvOrDefault(cfg.APIKey, "GRAFANA_AM_API_KEY", "")
+	debug, err := getBooleanOverriddenByEnvOrDefault(cfg.Debug, "GRAFANA_AM_DEBUG", false)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to parse GRAFANA_CLOUD_RETRIES", err.Error())
+		resp.Diagnostics.AddError("Failed to parse GRAFANA_AM_DEBUG", err.Error())
 		return
 	}
-	retryTimeout, err := getIntOverriddenByEnvOrDefault(cfg.RetryWait, "GRAFANA_CLOUD_RETRY_WAIT", 0)
+	retries, err := getIntOverriddenByEnvOrDefault(cfg.Retries, "GRAFANA_AM_RETRIES", 3)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to parse GRAFANA_CLOUD_RETRY_WAIT", err.Error())
+		resp.Diagnostics.AddError("Failed to parse GRAFANA_AM_RETRIES", err.Error())
 		return
 	}
-
-	var retryStatusCodes []string
-	if envRetryStatusCodes := os.Getenv("GRAFANA_CLOUD_RETRY_STATUS_CODES"); envRetryStatusCodes != "" {
-		retryStatusCodes = strings.Split(envRetryStatusCodes, ",")
-	} else if !cfg.RetryStatusCodes.IsNull() {
-		for _, v := range cfg.RetryStatusCodes.Elements() {
-			if vStr, ok := v.(types.String); ok {
-				retryStatusCodes = append(retryStatusCodes, vStr.ValueString())
-			} else {
-				resp.Diagnostics.AddError("Non-string value in retry_status_codes", fmt.Sprintf("got %v", v))
-			}
-		}
-	} else {
-		retryStatusCodes = []string{
-			"429",
-			"5xx",
-			"401", // In high-load scenarios, Grafana sometimes returns 401s.
-		}
+	httpClient := cleanhttp.DefaultClient()
+	if retries > 0 {
+		retryClient := retryablehttp.NewClient()
+		retryClient.RetryMax = retries
+		httpClient = retryClient.StandardClient()
 	}
 
 	httpHeaders := make(map[string]string)
@@ -172,11 +166,10 @@ func (p *AdaptiveMetricsProvider) Configure(ctx context.Context, req provider.Co
 	}
 
 	c, err := client.New(apiURL, &client.Config{
-		APIKey:           apiKey,
-		NumRetries:       retries,
-		RetryTimeout:     time.Second * time.Duration(retryTimeout),
-		RetryStatusCodes: retryStatusCodes,
-		HTTPHeaders:      httpHeaders,
+		APIKey:      apiKey,
+		HTTPHeaders: httpHeaders,
+		Debug:       debug,
+		HttpClient:  httpClient,
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Could not instantiate the API client.", err.Error())

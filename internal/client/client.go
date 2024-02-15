@@ -8,10 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
-	"strconv"
-	"time"
 
 	"github.com/hashicorp/go-cleanhttp"
 )
@@ -29,12 +26,8 @@ type Config struct {
 	APIKey string
 	// HTTPHeaders are optional HTTP headers.
 	HTTPHeaders map[string]string
-	// NumRetries contains the number of attempted retries
-	NumRetries int
-	// RetryTimeout says how long to wait before retrying a request
-	RetryTimeout time.Duration
-	// RetryStatusCodes contains the list of status codes to retry, use "x" as a wildcard for a single digit (default: [429, 5xx])
-	RetryStatusCodes []string
+	Debug       bool
+	HttpClient  *http.Client
 }
 
 // New creates a new Grafana client.
@@ -43,11 +36,14 @@ func New(baseURL string, cfg *Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if cfg.HttpClient == nil {
+		cfg.HttpClient = cleanhttp.DefaultClient()
+	}
 
 	return &Client{
 		Cfg:     cfg,
 		BaseURL: *u,
-		client:  cleanhttp.DefaultClient(),
+		client:  cfg.HttpClient,
 	}, nil
 }
 
@@ -57,59 +53,23 @@ func (c *Client) request(method, requestPath string, body []byte, responseStruct
 }
 
 func (c *Client) requestWithHeaders(method, requestPath string, header http.Header, body []byte, responseStruct interface{}) (http.Header, error) {
-	var (
-		req          *http.Request
-		resp         *http.Response
-		err          error
-		bodyContents []byte
-	)
-
-	// retry logic
-	for n := 0; n <= c.Cfg.NumRetries; n++ {
-		req, err = c.newRequest(method, requestPath, header, bytes.NewReader(body))
-		if err != nil {
-			return nil, err
-		}
-
-		// Wait a bit if that's not the first request
-		if n != 0 {
-			if c.Cfg.RetryTimeout == 0 {
-				c.Cfg.RetryTimeout = time.Second * 5
-			}
-			time.Sleep(c.Cfg.RetryTimeout)
-		}
-
-		resp, err = c.client.Do(req)
-
-		// If err is not nil, retry again
-		// That's either caused by client policy, or failure to speak HTTP (such as network connectivity problem). A
-		// non-2xx status code doesn't cause an error.
-		if err != nil {
-			continue
-		}
-
-		// read the body (even on non-successful HTTP status codes), as that's what the unit tests expect
-		bodyContents, err = io.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-
-		// if there was an error reading the body, try again
-		if err != nil {
-			continue
-		}
-
-		shouldRetry, err := matchRetryCode(resp.StatusCode, c.Cfg.RetryStatusCodes)
-		if err != nil {
-			return nil, err
-		}
-		if !shouldRetry {
-			break
-		}
-	}
+	req, err := c.newRequest(method, requestPath, header, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 
-	if os.Getenv("GF_LOG") != "" {
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	bodyContents, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.Cfg.Debug {
 		log.Printf("response status %d with body %v", resp.StatusCode, string(bodyContents))
 	}
 
@@ -159,7 +119,7 @@ func (c *Client) newRequest(method, requestPath string, header http.Header, body
 		}
 	}
 
-	if os.Getenv("GF_LOG") != "" {
+	if c.Cfg.Debug {
 		if body == nil {
 			log.Printf("request (%s) to %s with no body data", method, u.String())
 		} else {
@@ -185,32 +145,6 @@ func (c *Client) newRequest(method, requestPath string, header http.Header, body
 
 	req.Header.Add("Content-Type", "application/json")
 	return req, err
-}
-
-// matchRetryCode checks if the status code matches any of the configured retry status codes.
-func matchRetryCode(gottenCode int, retryCodes []string) (bool, error) {
-	gottenCodeStr := strconv.Itoa(gottenCode)
-	for _, retryCode := range retryCodes {
-		if len(retryCode) != 3 {
-			return false, fmt.Errorf("invalid retry status code: %s", retryCode)
-		}
-		matched := true
-		for i := range retryCode {
-			c := retryCode[i]
-			if c == 'x' {
-				continue
-			}
-			if gottenCodeStr[i] != c {
-				matched = false
-				break
-			}
-		}
-		if matched {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }
 
 type ErrNotFound struct {
