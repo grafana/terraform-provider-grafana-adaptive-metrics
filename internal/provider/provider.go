@@ -190,12 +190,16 @@ func (p *AdaptiveMetricsProvider) Configure(ctx context.Context, req provider.Co
 	}
 
 	resp.DataSourceData = c // TODO
-	resp.ResourceData = aggRules
+	resp.ResourceData = &resourceData{
+		aggRules: aggRules,
+		client:   c,
+	}
 }
 
 func (p *AdaptiveMetricsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		newRuleResource,
+		newExemptionResource,
 	}
 }
 
@@ -209,4 +213,9 @@ func New(version string) func() provider.Provider {
 			version: version,
 		}
 	}
+}
+
+type resourceData struct {
+	aggRules *AggregationRules
+	client   *client.Client
 }

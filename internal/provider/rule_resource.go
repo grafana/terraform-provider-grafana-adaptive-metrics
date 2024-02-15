@@ -33,7 +33,7 @@ func (r *ruleResource) Configure(_ context.Context, req resource.ConfigureReques
 		return
 	}
 
-	data, ok := req.ProviderData.(*AggregationRules)
+	data, ok := req.ProviderData.(*resourceData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected resource configure type",
@@ -42,7 +42,7 @@ func (r *ruleResource) Configure(_ context.Context, req resource.ConfigureReques
 		return
 	}
 
-	r.rules = data
+	r.rules = data.aggRules
 }
 
 func (r *ruleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -126,6 +126,7 @@ func (r *ruleResource) Create(ctx context.Context, req resource.CreateRequest, r
 	err := r.rules.Create(plan.ToAPIReq())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
+		return
 	}
 
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
@@ -143,6 +144,7 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	rule, err := r.rules.Read(state.Metric.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read aggregation rule", err.Error())
+		return
 	}
 
 	tf := rule.ToTF()
@@ -160,6 +162,7 @@ func (r *ruleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	err := r.rules.Update(plan.ToAPIReq())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
+		return
 	}
 
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))

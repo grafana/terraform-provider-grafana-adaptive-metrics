@@ -38,22 +38,6 @@ func (r AggregationRule) ToTF() RuleTF {
 	}
 }
 
-func toTypesStringSlice(in []string) []types.String {
-	out := make([]types.String, len(in))
-	for i, s := range in {
-		out[i] = types.StringValue(s)
-	}
-	return out
-}
-
-func toStringSlice(in []types.String) []string {
-	out := make([]string, len(in))
-	for i, s := range in {
-		out[i] = s.ValueString()
-	}
-	return out
-}
-
 type RuleTF struct {
 	Metric    types.String `tfsdk:"metric"`
 	MatchType types.String `tfsdk:"match_type"`
