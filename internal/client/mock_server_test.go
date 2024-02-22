@@ -71,19 +71,43 @@ func (s *mockServer) close() {
 	s.server.Close()
 }
 
-func (s *mockServer) addExpected(
-	method, path string, reqHeader http.Header, reqBody []byte,
-	respHeader http.Header, respBody []byte,
-) {
-	s.responses = append(s.responses, &mockServerResponse{
-		method:    method,
-		path:      path,
-		params:    url.Values{},
-		reqHeader: reqHeader,
-		reqBody:   reqBody,
-
+func (s *mockServer) addExpected(method, path string, options ...mockRequestOption) {
+	resp := &mockServerResponse{
+		method:     method,
+		path:       path,
+		params:     url.Values{},
 		statusCode: 200,
-		respHeader: respHeader,
-		respBody:   respBody,
-	})
+	}
+
+	for _, opt := range options {
+		opt(resp)
+	}
+
+	s.responses = append(s.responses, resp)
+}
+
+type mockRequestOption func(*mockServerResponse)
+
+func withReqHeader(h http.Header) mockRequestOption {
+	return func(r *mockServerResponse) {
+		r.reqHeader = h
+	}
+}
+
+func withReqBody(b []byte) mockRequestOption {
+	return func(r *mockServerResponse) {
+		r.reqBody = b
+	}
+}
+
+func withRespHeader(h http.Header) mockRequestOption {
+	return func(r *mockServerResponse) {
+		r.respHeader = h
+	}
+}
+
+func withRespBody(b []byte) mockRequestOption {
+	return func(r *mockServerResponse) {
+		r.respBody = b
+	}
 }
