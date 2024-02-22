@@ -43,3 +43,7 @@ resource "grafana-adaptive-metrics_rule" "prometheus_request_duration_seconds_su
 - `ingest` (Boolean) Also ingest the raw series alongside the aggregated series. Note that this will increase your overall cost and is for troubleshooting purposes only.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 - `match_type` (String) Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.
+
+### Read-Only
+
+- `managed_by` (String) Used to identify the rule as being managed by this Terraform provider.

@@ -105,6 +105,12 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Description: "The delay until aggregation is performed.",
 			},
 
+			"managed_by": schema.StringAttribute{
+				Computed:    true,
+				Default:     stringdefault.StaticString("terraform"),
+				Description: "Used to identify the rule as being managed by this Terraform provider.",
+			},
+
 			"ingest": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
@@ -74,6 +75,11 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"updated_at": schema.Int64Attribute{
 				Computed:    true,
 				Description: "Unix timestamp of when this exemption was last updated.",
+			},
+			"managed_by": schema.StringAttribute{
+				Computed:    true,
+				Default:     stringdefault.StaticString("terraform"),
+				Description: "Used to identify the rule as being managed by this Terraform provider.",
 			},
 		},
 	}

@@ -27,4 +27,5 @@ description: |-
 
 - `created_at` (Number) Unix timestamp of when this exemption was created.
 - `id` (String) A UILD that uniquely identifies the exemption.
+- `managed_by` (String) Used to identify the rule as being managed by this Terraform provider.
 - `updated_at` (Number) Unix timestamp of when this exemption was last updated.
