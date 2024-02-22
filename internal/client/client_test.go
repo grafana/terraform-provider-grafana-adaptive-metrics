@@ -51,17 +51,17 @@ func TestClientAuths(t *testing.T) {
 	apiHeader := make(http.Header)
 	apiHeader.Add("Authorization", "Bearer apikey")
 
-	s.addExpected(
-		"GET", "/aggregations/recommendations/config", apiHeader, nil,
-		nil, []byte(`{}`),
+	s.addExpected("GET", "/aggregations/recommendations/config",
+		withReqHeader(apiHeader),
+		withRespBody([]byte(`{}`)),
 	)
 
 	scopeHeader := make(http.Header)
 	scopeHeader.Add("x-scope-orgid", "9960")
 
-	s.addExpected(
-		"GET", "/aggregations/recommendations/config", scopeHeader, nil,
-		nil, []byte(`{}`),
+	s.addExpected("GET", "/aggregations/recommendations/config",
+		withReqHeader(scopeHeader),
+		withRespBody([]byte(`{}`)),
 	)
 
 	cAPI, err := New(s.server.URL, &Config{APIKey: "apikey"})
@@ -81,9 +81,8 @@ func TestAggregationRecommendations(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	s.addExpected(
-		"GET", "/aggregations/recommendations", nil, nil,
-		nil, minifiedJson,
+	s.addExpected("GET", "/aggregations/recommendations",
+		withRespBody(minifiedJson),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -99,9 +98,8 @@ func TestUpdateAggregationRecommendationsConfig(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	s.addExpected(
-		"POST", "/aggregations/recommendations/config", nil, []byte(`{"keep_labels":["namespace"]}`),
-		nil, nil,
+	s.addExpected("POST", "/aggregations/recommendations/config",
+		withReqBody([]byte(`{"keep_labels":["namespace"]}`)),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -116,9 +114,8 @@ func TestAggregationRecommendationsConfig(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	s.addExpected(
-		"GET", "/aggregations/recommendations/config", nil, nil,
-		nil, []byte(`{"keep_labels":["namespace"]}`),
+	s.addExpected("GET", "/aggregations/recommendations/config",
+		withRespBody([]byte(`{"keep_labels":["namespace"]}`)),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -140,9 +137,9 @@ func TestAggregationRules(t *testing.T) {
 	header := make(http.Header)
 	header.Set("Etag", etag)
 
-	s.addExpected(
-		"GET", "/aggregations/rules", nil, nil,
-		header, minifiedJson,
+	s.addExpected("GET", "/aggregations/rules",
+		withRespHeader(header),
+		withRespBody(minifiedJson),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -167,9 +164,10 @@ func TestUpdateAggregationRules(t *testing.T) {
 	respHeader := make(http.Header)
 	respHeader.Set("ETag", "\"updated-fake-etag\"")
 
-	s.addExpected(
-		"POST", "/aggregations/rules", expectedHeader, minifiedJson,
-		respHeader, nil,
+	s.addExpected("POST", "/aggregations/rules",
+		withReqHeader(expectedHeader),
+		withReqBody(minifiedJson),
+		withRespHeader(respHeader),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -192,9 +190,10 @@ func TestCreateAggregationRule(t *testing.T) {
 	respHeader := make(http.Header)
 	respHeader.Set("ETag", "\"updated-fake-etag\"")
 
-	s.addExpected(
-		"POST", "/aggregations/rule/test_metric", expectedHeader, []byte(`{"metric":"test_metric","drop":true}`),
-		respHeader, nil,
+	s.addExpected("POST", "/aggregations/rule/test_metric",
+		withReqHeader(expectedHeader),
+		withReqBody([]byte(`{"metric":"test_metric","drop":true}`)),
+		withRespHeader(respHeader),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -214,9 +213,9 @@ func TestReadAggregationRule(t *testing.T) {
 	respHeader := make(http.Header)
 	respHeader.Set("ETag", etag)
 
-	s.addExpected(
-		"GET", "/aggregations/rule/test_metric", nil, nil,
-		respHeader, []byte(`{"metric":"test_metric","drop":true}`),
+	s.addExpected("GET", "/aggregations/rule/test_metric",
+		withRespHeader(respHeader),
+		withRespBody([]byte(`{"metric":"test_metric","drop":true}`)),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -240,9 +239,10 @@ func TestUpdateAggregationRule(t *testing.T) {
 	respHeader := make(http.Header)
 	respHeader.Set("ETag", "\"updated-fake-etag\"")
 
-	s.addExpected(
-		"PUT", "/aggregations/rule/test_metric", expectedHeader, []byte(`{"metric":"test_metric","drop":true}`),
-		respHeader, nil,
+	s.addExpected("PUT", "/aggregations/rule/test_metric",
+		withReqHeader(expectedHeader),
+		withReqBody([]byte(`{"metric":"test_metric","drop":true}`)),
+		withRespHeader(respHeader),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -265,9 +265,9 @@ func TestDeleteAggregationRule(t *testing.T) {
 	respHeader := make(http.Header)
 	respHeader.Set("ETag", "\"updated-fake-etag\"")
 
-	s.addExpected(
-		"DELETE", "/aggregations/rule/test_metric", expectedHeader, nil,
-		respHeader, nil,
+	s.addExpected("DELETE", "/aggregations/rule/test_metric",
+		withReqHeader(expectedHeader),
+		withRespHeader(respHeader),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -286,9 +286,9 @@ func TestCreateExemption(t *testing.T) {
 	reqBody := []byte(`{"id":"","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}`)
 	respBody := []byte(`{"result":{"id":"generated-ulid","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}}`)
 
-	s.addExpected(
-		"POST", "/v1/recommendations/exemptions", nil, reqBody,
-		nil, respBody,
+	s.addExpected("POST", "/v1/recommendations/exemptions",
+		withReqBody(reqBody),
+		withRespBody(respBody),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -324,9 +324,8 @@ func TestReadExemption(t *testing.T) {
 		UpdatedAt:  time.Time{},
 	}
 
-	s.addExpected(
-		"GET", "/v1/recommendations/exemptions/generated-ulid", nil, nil,
-		nil, respBody,
+	s.addExpected("GET", "/v1/recommendations/exemptions/generated-ulid",
+		withRespBody(respBody),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -344,9 +343,8 @@ func TestUpdateExemption(t *testing.T) {
 
 	reqBody := []byte(`{"id":"generated-ulid","metric":"test_metric","keep_labels":["foobar"],"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z"}`)
 
-	s.addExpected(
-		"PUT", "/v1/recommendations/exemptions/generated-ulid", nil, reqBody,
-		nil, nil,
+	s.addExpected("PUT", "/v1/recommendations/exemptions/generated-ulid",
+		withReqBody(reqBody),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -364,10 +362,7 @@ func TestDeleteExemption(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	s.addExpected(
-		"DELETE", "/v1/recommendations/exemptions/generated-ulid", nil, nil,
-		nil, nil,
-	)
+	s.addExpected("DELETE", "/v1/recommendations/exemptions/generated-ulid")
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
