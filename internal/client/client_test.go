@@ -2,6 +2,7 @@ package client
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -12,7 +13,8 @@ import (
 
 var (
 	// minifiedJson is the json equivalent for rulesPayload and recsPayload below.
-	minifiedJson = []byte(`[{"metric":"kube_persistentvolumeclaim_created","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"]},{"metric":"kube_persistentvolumeclaim_resource_requests_storage_bytes","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"]}]`)
+	minifiedJson        = []byte(`[{"metric":"kube_persistentvolumeclaim_created","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"]},{"metric":"kube_persistentvolumeclaim_resource_requests_storage_bytes","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"]}]`)
+	minifiedVerboseJson = []byte(`[{"metric":"kube_persistentvolumeclaim_created","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"],"recommended_action":"keep"},{"metric":"kube_persistentvolumeclaim_resource_requests_storage_bytes","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"],"recommended_action":"update"}]`)
 
 	rulesPayload = []model.AggregationRule{
 		{
@@ -40,6 +42,24 @@ var (
 				DropLabels:   []string{"persistentvolumeclaim"},
 				Aggregations: []string{"count", "sum"},
 			},
+		},
+	}
+	verboseRecsPayload = []model.AggregationRecommendation{
+		{
+			AggregationRule: model.AggregationRule{
+				Metric:       "kube_persistentvolumeclaim_created",
+				DropLabels:   []string{"persistentvolumeclaim"},
+				Aggregations: []string{"count", "sum"},
+			},
+			RecommendedAction: "keep",
+		},
+		{
+			AggregationRule: model.AggregationRule{
+				Metric:       "kube_persistentvolumeclaim_resource_requests_storage_bytes",
+				DropLabels:   []string{"persistentvolumeclaim"},
+				Aggregations: []string{"count", "sum"},
+			},
+			RecommendedAction: "update",
 		},
 	}
 )
@@ -88,10 +108,28 @@ func TestAggregationRecommendations(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations()
+	actual, err := c.AggregationRecommendations(false)
 	require.NoError(t, err)
 
 	require.Equal(t, recsPayload, actual)
+}
+
+func TestAggregationVerboseRecommendations(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	s.addExpected("GET", "/aggregations/recommendations",
+		withRespBody(minifiedVerboseJson),
+		withParams(url.Values{"verbose": []string{"true"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.AggregationRecommendations(true)
+	require.NoError(t, err)
+
+	require.Equal(t, verboseRecsPayload, actual)
 }
 
 func TestUpdateAggregationRecommendationsConfig(t *testing.T) {

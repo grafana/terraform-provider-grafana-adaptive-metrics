@@ -197,7 +197,9 @@ func (p *AdaptiveMetricsProvider) Resources(_ context.Context) []func() resource
 }
 
 func (p *AdaptiveMetricsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		newRecommendationDatasource,
+	}
 }
 
 func New(version string) func() provider.Provider {

@@ -20,7 +20,7 @@ func (c *Client) CreateExemption(ex model.Exemption) (model.Exemption, error) {
 
 	resp := exemptionResp{}
 
-	err = c.request("POST", exemptionsEndpoint, body, &resp)
+	err = c.request("POST", exemptionsEndpoint, nil, body, &resp)
 	if err != nil {
 		return model.Exemption{}, err
 	}
@@ -32,7 +32,7 @@ func (c *Client) ReadExemption(exID string) (model.Exemption, error) {
 	resp := exemptionResp{}
 	endpoint := fmt.Sprintf(exemptionEndpoint, exID)
 
-	err := c.request("GET", endpoint, nil, &resp)
+	err := c.request("GET", endpoint, nil, nil, &resp)
 	return resp.Result, err
 }
 
@@ -43,18 +43,18 @@ func (c *Client) UpdateExemption(ex model.Exemption) error {
 	}
 
 	endpoint := fmt.Sprintf(exemptionEndpoint, ex.ID)
-	return c.request("PUT", endpoint, body, nil)
+	return c.request("PUT", endpoint, nil, body, nil)
 }
 
 func (c *Client) DeleteExemption(exID string) error {
 	endpoint := fmt.Sprintf(exemptionEndpoint, exID)
-	return c.request("DELETE", endpoint, nil, nil)
+	return c.request("DELETE", endpoint, nil, nil, nil)
 }
 
 func (c *Client) ListExemptions() ([]model.Exemption, error) {
 	resp := exemptionsResp{}
 
-	err := c.request("GET", exemptionsEndpoint, nil, &resp)
+	err := c.request("GET", exemptionsEndpoint, nil, nil, &resp)
 	if err != nil {
 		return nil, err
 	}
