@@ -61,93 +61,78 @@ func (r *recommendationDatasource) Schema(_ context.Context, _ datasource.Schema
 							Description: "The name of the metric to be aggregated.",
 						},
 						"match_type": schema.StringAttribute{
-							Optional:    true,
 							Computed:    true,
 							Description: "Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.",
 						},
 
 						"drop": schema.BoolAttribute{
-							Optional:    true,
 							Computed:    true,
 							Description: "Set to true to skip both ingestion and aggregation and drop the metric entirely.",
 						},
 						"keep_labels": schema.ListAttribute{
 							ElementType: types.StringType,
-							Optional:    true,
 							Computed:    true,
 							Description: "The array of labels to keep; labels not in this array will be aggregated.",
 						},
 						"drop_labels": schema.ListAttribute{
 							ElementType: types.StringType,
-							Optional:    true,
 							Computed:    true,
 							Description: "The array of labels that will be aggregated.",
 						},
 
 						"aggregations": schema.ListAttribute{
 							ElementType: types.StringType,
-							Optional:    true,
 							Computed:    true,
 							Description: "The array of aggregation types to calculate for this metric.",
 						},
 
 						"aggregation_interval": schema.StringAttribute{
-							Optional:    true,
 							Computed:    true,
 							Description: "The interval at which to generate the aggregated series.",
 						},
 						"aggregation_delay": schema.StringAttribute{
-							Optional:    true,
 							Computed:    true,
 							Description: "The delay until aggregation is performed.",
 						},
 
 						"ingest": schema.BoolAttribute{
-							Optional:    true,
 							Computed:    true,
 							Description: "Also ingest the raw series alongside the aggregated series. Note that this will increase your overall cost and is for troubleshooting purposes only.",
 						},
 
 						"recommended_action": schema.StringAttribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The recommended action for the aggregation rule.",
 						},
 
 						"usages_in_rules": schema.Int64Attribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The number of rules that use this metric.",
 						},
 
 						"usages_in_queries": schema.Int64Attribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The number of queries that use this metric..",
 						},
 
 						"usages_in_dashboards": schema.Int64Attribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The number of dashboards that use this metric.",
 						},
 
 						"kept_labels": schema.ListAttribute{
 							ElementType: types.StringType,
 							Computed:    true,
-							Optional:    true,
 							Description: "The array of labels that will be kept.",
 						},
 
 						"total_series_after_aggregation": schema.Int64Attribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The total number of series after aggregation.",
 						},
 
 						"total_series_before_aggregation": schema.Int64Attribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The total number of series before aggregation.",
 						},
 					},
