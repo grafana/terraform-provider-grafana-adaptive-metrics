@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"net/url"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
@@ -11,15 +12,19 @@ const (
 	recommendationsConfigEndpoint = "/aggregations/recommendations/config"
 )
 
-func (c *Client) AggregationRecommendations() ([]model.AggregationRecommendation, error) {
+func (c *Client) AggregationRecommendations(verbose bool) ([]model.AggregationRecommendation, error) {
 	var recs []model.AggregationRecommendation
-	err := c.request("GET", recommendationsEndpoint, nil, &recs)
+	params := url.Values{}
+	if verbose {
+		params.Add("verbose", "true")
+	}
+	err := c.request("GET", recommendationsEndpoint, params, nil, &recs)
 	return recs, err
 }
 
 func (c *Client) AggregationRecommendationsConfig() (model.AggregationRecommendationConfiguration, error) {
 	config := model.AggregationRecommendationConfiguration{}
-	err := c.request("GET", recommendationsConfigEndpoint, nil, &config)
+	err := c.request("GET", recommendationsConfigEndpoint, nil, nil, &config)
 	return config, err
 }
 
@@ -29,5 +34,5 @@ func (c *Client) UpdateAggregationRecommendationsConfig(config model.Aggregation
 		return err
 	}
 
-	return c.request("POST", recommendationsConfigEndpoint, body, nil)
+	return c.request("POST", recommendationsConfigEndpoint, nil, body, nil)
 }

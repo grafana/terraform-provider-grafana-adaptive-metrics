@@ -111,3 +111,9 @@ func withRespBody(b []byte) mockRequestOption {
 		r.respBody = b
 	}
 }
+
+func withParams(p url.Values) mockRequestOption {
+	return func(r *mockServerResponse) {
+		r.params = p
+	}
+}
