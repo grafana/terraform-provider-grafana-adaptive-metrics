@@ -12,6 +12,7 @@ type Exemption struct {
 	KeepLabels []string  `json:"keep_labels,omitempty"`
 	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`
+	ManagedBy  string    `json:"managed_by,omitempty"`
 }
 
 func (e Exemption) ToTF() ExemptionTF {
@@ -41,5 +42,6 @@ func (e ExemptionTF) ToAPIReq() Exemption {
 		KeepLabels: toStringSlice(e.KeepLabels),
 		CreatedAt:  time.UnixMilli(e.CreatedAt.ValueInt64()),
 		UpdatedAt:  time.UnixMilli(e.UpdatedAt.ValueInt64()),
+		ManagedBy:  managedByTF,
 	}
 }

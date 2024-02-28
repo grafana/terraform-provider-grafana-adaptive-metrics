@@ -4,6 +4,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+const managedByTF = "terraform"
+
 type AggregationRule struct {
 	Metric    string `json:"metric"`
 	MatchType string `json:"match_type,omitempty"`
@@ -16,6 +18,8 @@ type AggregationRule struct {
 
 	AggregationInterval string `json:"aggregation_interval,omitempty"`
 	AggregationDelay    string `json:"aggregation_delay,omitempty"`
+
+	ManagedBy string `json:"managed_by,omitempty"`
 
 	Ingest bool `json:"ingest,omitempty"`
 }
@@ -69,6 +73,8 @@ func (r RuleTF) ToAPIReq() AggregationRule {
 
 		AggregationInterval: r.AggregationInterval.ValueString(),
 		AggregationDelay:    r.AggregationDelay.ValueString(),
+
+		ManagedBy: managedByTF,
 
 		Ingest: r.Ingest.ValueBool(),
 	}
