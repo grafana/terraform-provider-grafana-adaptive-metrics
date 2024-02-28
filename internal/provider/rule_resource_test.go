@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/require"
+
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
 func TestAccRuleResource(t *testing.T) {
@@ -49,6 +52,35 @@ resource "grafana-adaptive-metrics_rule" "test" {
 			},
 			// Update + Read.
 			{
+				Config: providerConfig + fmt.Sprintf(`
+resource "grafana-adaptive-metrics_rule" "test" {
+	metric = "%s"
+	match_type = "prefix"
+	drop_labels = [ "instance" ]
+	aggregations = [ "sum" ]
+	ingest = true
+}
+`, metricName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "metric", metricName),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "match_type", "prefix"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop", "false"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "keep_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.0", "instance"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.0", "sum"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "ingest", "true"),
+				),
+			},
+			// External delete of resource, TF should recreate it.
+			{
+				PreConfig: func() {
+					aggRules := AggregationRulesForAccTest(t)
+					require.NoError(t, aggRules.Delete(model.AggregationRule{Metric: metricName}))
+				},
 				Config: providerConfig + fmt.Sprintf(`
 resource "grafana-adaptive-metrics_rule" "test" {
 	metric = "%s"
