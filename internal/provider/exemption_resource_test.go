@@ -24,7 +24,6 @@ resource "grafana-adaptive-metrics_exemption" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "metric", "test_tf_metric"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.#", "1"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
-					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "managed_by", "terraform"),
 				),
 			},
 			// ImportState.
@@ -50,7 +49,6 @@ resource "grafana-adaptive-metrics_exemption" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.#", "2"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.1", "cluster"),
-					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "managed_by", "terraform"),
 				),
 			},
 			// Delete happens automatically.

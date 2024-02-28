@@ -22,7 +22,6 @@ func (e Exemption) ToTF() ExemptionTF {
 		KeepLabels: toTypesStringSlice(e.KeepLabels),
 		CreatedAt:  types.Int64Value(e.CreatedAt.UnixMilli()),
 		UpdatedAt:  types.Int64Value(e.UpdatedAt.UnixMilli()),
-		ManagedBy:  types.StringValue(e.ManagedBy),
 	}
 }
 
@@ -32,7 +31,6 @@ type ExemptionTF struct {
 	KeepLabels []types.String `tfsdk:"keep_labels"`
 	CreatedAt  types.Int64    `tfsdk:"created_at"`
 	UpdatedAt  types.Int64    `tfsdk:"updated_at"`
-	ManagedBy  types.String   `tfsdk:"managed_by"`
 
 	LastUpdated types.String `tfsdk:"-"`
 }
@@ -44,6 +42,6 @@ func (e ExemptionTF) ToAPIReq() Exemption {
 		KeepLabels: toStringSlice(e.KeepLabels),
 		CreatedAt:  time.UnixMilli(e.CreatedAt.ValueInt64()),
 		UpdatedAt:  time.UnixMilli(e.UpdatedAt.ValueInt64()),
-		ManagedBy:  e.ManagedBy.ValueString(),
+		ManagedBy:  managedByTF,
 	}
 }
