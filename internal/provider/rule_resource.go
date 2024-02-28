@@ -143,7 +143,8 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	rule, err := r.rules.Read(state.Metric.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to read aggregation rule", err.Error())
+		resp.Diagnostics.AddWarning("Unable to read aggregation rule", err.Error())
+		resp.State.RemoveResource(ctx)
 		return
 	}
 

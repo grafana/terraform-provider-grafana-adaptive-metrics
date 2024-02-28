@@ -5,6 +5,10 @@ import (
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 )
 
 func CheckAccTestsEnabled(t *testing.T) {
@@ -30,4 +34,21 @@ func RandString(n int) string {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b)
+}
+
+func AggregationRulesForAccTest(t *testing.T) *AggregationRules {
+	t.Helper()
+
+	apiURL := os.Getenv("GRAFANA_AM_API_URL")
+	apiKey := os.Getenv("GRAFANA_AM_API_KEY")
+
+	c, err := client.New(apiURL, &client.Config{
+		APIKey: apiKey,
+	})
+	require.NoError(t, err)
+
+	aggRules := NewAggregationRules(c)
+	require.NoError(t, aggRules.Init())
+
+	return aggRules
 }
