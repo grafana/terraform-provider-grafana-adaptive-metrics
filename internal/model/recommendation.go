@@ -44,7 +44,16 @@ func (r *AggregationRecommendation) ToTF() AggregationRecommendationTF {
 
 type AggregationRecommendationListTF struct {
 	Verbose         types.Bool                    `tfsdk:"verbose"`
+	Action          []types.String                `tfsdk:"action"`
 	Recommendations []AggregationRecommendationTF `tfsdk:"recommendations"`
+}
+
+func (tf *AggregationRecommendationListTF) IsVerbose() bool {
+	return tf.Verbose.ValueBool()
+}
+
+func (tf *AggregationRecommendationListTF) GetActionIn() []string {
+	return toStringSlice(tf.Action)
 }
 
 type AggregationRecommendationTF struct {

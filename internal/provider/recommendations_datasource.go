@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
@@ -51,6 +52,11 @@ func (r *recommendationDatasource) Schema(_ context.Context, _ datasource.Schema
 			"verbose": schema.BoolAttribute{
 				Optional:    true,
 				Description: "If true, the response will include additional information about the recommendation, such as the number of rules, queries, and dashboards that use the metric.",
+			},
+			"action": schema.ListAttribute{
+				Optional:    true,
+				ElementType: types.StringType,
+				Description: "Limit the types of recommended actions to list. Valid recommended actions are 'add', 'remove', 'keep', and 'update'. Defaults to listing all actions.",
 			},
 			"recommendations": schema.ListNestedAttribute{
 				Computed: true,
@@ -146,7 +152,7 @@ func (r *recommendationDatasource) Read(ctx context.Context, req datasource.Read
 	var state model.AggregationRecommendationListTF
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 
-	recs, err := r.client.AggregationRecommendations(state.Verbose.ValueBool())
+	recs, err := r.client.AggregationRecommendations(state.IsVerbose(), state.GetActionIn())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read aggregation rule", err.Error())
 		return

@@ -81,23 +81,31 @@ data "grafana-adaptive-metrics_recommendations" "test" {
 
 var metricPathRegex = regexp.MustCompile(`recommendations\.\d+\.metric`)
 
+func findPrimaryInstance(s *terraform.State, name string) (*terraform.InstanceState, error) {
+	root := s.RootModule()
+	r, ok := root.Resources[name]
+	if !ok {
+		return nil, fmt.Errorf("resource not found: %s", name)
+	}
+
+	if r.Primary == nil {
+		return nil, fmt.Errorf("primary instance not found: %s", name)
+	}
+
+	return r.Primary, nil
+}
+
 // checkMetricRecommendationAttr finds the recommendation for a metric and
 // checks the value of an attribute. Recommendations do not have a predictable
 // order, so we need to find the recommendation for the metric first.
 func checkMetricRecommendationAttr(name, metric, attr, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		root := s.RootModule()
-		r, ok := root.Resources[name]
-		if !ok {
-			return fmt.Errorf("Resource not found: %s", name)
-		}
-
-		if r.Primary == nil {
-			return fmt.Errorf("Primary instance not found: %s", name)
+		primary, err := findPrimaryInstance(s, name)
+		if err != nil {
+			return err
 		}
 
 		var prefix string
-		primary := r.Primary
 		for k, v := range primary.Attributes {
 			if metricPathRegex.MatchString(k) && v == metric {
 				prefix = strings.TrimSuffix(k, ".metric")
