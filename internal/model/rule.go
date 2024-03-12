@@ -37,8 +37,6 @@ func (r AggregationRule) ToTF() RuleTF {
 
 		AggregationInterval: types.StringValue(r.AggregationInterval),
 		AggregationDelay:    types.StringValue(r.AggregationDelay),
-
-		Ingest: types.BoolValue(r.Ingest),
 	}
 }
 
@@ -54,8 +52,6 @@ type RuleTF struct {
 
 	AggregationInterval types.String `tfsdk:"aggregation_interval"`
 	AggregationDelay    types.String `tfsdk:"aggregation_delay"`
-
-	Ingest types.Bool `tfsdk:"ingest"`
 
 	LastUpdated types.String `tfsdk:"-"`
 }
@@ -75,7 +71,5 @@ func (r RuleTF) ToAPIReq() AggregationRule {
 		AggregationDelay:    r.AggregationDelay.ValueString(),
 
 		ManagedBy: managedByTF,
-
-		Ingest: r.Ingest.ValueBool(),
 	}
 }

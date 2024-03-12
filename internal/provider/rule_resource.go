@@ -104,13 +104,6 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Default:     stringdefault.StaticString(""),
 				Description: "The delay until aggregation is performed.",
 			},
-
-			"ingest": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     defaultBoolFalse{},
-				Description: "Also ingest the raw series alongside the aggregated series. Note that this will increase your overall cost and is for troubleshooting purposes only.",
-			},
 		},
 	}
 }

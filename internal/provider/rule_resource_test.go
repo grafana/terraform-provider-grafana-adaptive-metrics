@@ -35,7 +35,6 @@ resource "grafana-adaptive-metrics_rule" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "0"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
-					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "ingest", "false"),
 				),
 			},
 			// ImportState.
@@ -58,7 +57,6 @@ resource "grafana-adaptive-metrics_rule" "test" {
 	match_type = "prefix"
 	drop_labels = [ "instance" ]
 	aggregations = [ "sum" ]
-	ingest = true
 }
 `, metricName),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -72,7 +70,6 @@ resource "grafana-adaptive-metrics_rule" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.0", "sum"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
-					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "ingest", "true"),
 				),
 			},
 			// External delete of resource, TF should recreate it.
@@ -87,7 +84,6 @@ resource "grafana-adaptive-metrics_rule" "test" {
 	match_type = "prefix"
 	drop_labels = [ "instance" ]
 	aggregations = [ "sum" ]
-	ingest = true
 }
 `, metricName),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -101,7 +97,6 @@ resource "grafana-adaptive-metrics_rule" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.0", "sum"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
-					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "ingest", "true"),
 				),
 			},
 			// Delete happens automatically.
