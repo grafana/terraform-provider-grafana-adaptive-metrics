@@ -38,7 +38,6 @@ data "grafana-adaptive-metrics_recommendations" "test" {}
 					testAttr("aggregations.0", "count"),
 					testAttr("aggregation_interval", ""),
 					testAttr("aggregation_delay", ""),
-					testAttr("ingest", "false"),
 					testAttr("recommended_action", ""),
 					testAttr("usages_in_rules", "0"),
 					testAttr("usages_in_queries", "0"),

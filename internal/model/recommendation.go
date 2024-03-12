@@ -29,8 +29,6 @@ func (r *AggregationRecommendation) ToTF() AggregationRecommendationTF {
 		AggregationInterval: types.StringValue(r.AggregationInterval),
 		AggregationDelay:    types.StringValue(r.AggregationDelay),
 
-		Ingest: types.BoolValue(r.Ingest),
-
 		RecommendedAction:  types.StringValue(r.RecommendedAction),
 		UsagesInRules:      types.Int64Value(r.UsagesInRules),
 		UsagesInQueries:    types.Int64Value(r.UsagesInQueries),
@@ -69,8 +67,6 @@ type AggregationRecommendationTF struct {
 
 	AggregationInterval types.String `tfsdk:"aggregation_interval"`
 	AggregationDelay    types.String `tfsdk:"aggregation_delay"`
-
-	Ingest types.Bool `tfsdk:"ingest"`
 
 	RecommendedAction  types.String `tfsdk:"recommended_action"`
 	UsagesInRules      types.Int64  `tfsdk:"usages_in_rules"`
