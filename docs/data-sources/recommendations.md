@@ -17,6 +17,7 @@ description: |-
 
 ### Optional
 
+- `action` (List of String) Limit the types of recommended actions to list. Valid recommended actions are 'add', 'remove', 'keep', and 'update'. Defaults to listing all actions.
 - `verbose` (Boolean) If true, the response will include additional information about the recommendation, such as the number of rules, queries, and dashboards that use the metric.
 
 ### Read-Only
