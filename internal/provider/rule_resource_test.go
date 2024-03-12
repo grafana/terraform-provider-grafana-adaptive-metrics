@@ -99,6 +99,29 @@ resource "grafana-adaptive-metrics_rule" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
 				),
 			},
+			// Update of metric name, TF should replace the old aggregation rule with a new one in-line.
+			{
+				Config: providerConfig + fmt.Sprintf(`
+resource "grafana-adaptive-metrics_rule" "test" {
+	metric = "%s"
+	match_type = "prefix"
+	drop_labels = [ "instance" ]
+	aggregations = [ "sum" ]
+}
+`, metricName+"_replaced"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "metric", metricName+"_replaced"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "match_type", "prefix"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop", "false"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "keep_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.0", "instance"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "1"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.0", "sum"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
+				),
+			},
 			// Delete happens automatically.
 		},
 	})

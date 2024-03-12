@@ -147,21 +147,39 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 func (r *ruleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan model.RuleTF
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err := r.rules.Update(plan.ToAPIReq())
-	if err != nil {
-		resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
+	var state model.RuleTF
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	if plan.Metric.ValueString() != state.Metric.ValueString() {
+		err := r.rules.Delete(state.ToAPIReq())
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
+			return
+		}
+
+		err = r.rules.Create(plan.ToAPIReq())
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
+			return
+		}
+	} else {
+		err := r.rules.Update(plan.ToAPIReq())
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
+			return
+		}
+	}
+
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 func (r *ruleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
