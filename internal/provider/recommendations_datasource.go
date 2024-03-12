@@ -101,11 +101,6 @@ func (r *recommendationDatasource) Schema(_ context.Context, _ datasource.Schema
 							Description: "The delay until aggregation is performed.",
 						},
 
-						"ingest": schema.BoolAttribute{
-							Computed:    true,
-							Description: "Also ingest the raw series alongside the aggregated series. Note that this will increase your overall cost and is for troubleshooting purposes only.",
-						},
-
 						"recommended_action": schema.StringAttribute{
 							Computed:    true,
 							Description: "The recommended action for the aggregation rule.",

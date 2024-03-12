@@ -43,7 +43,6 @@ Read-Only:
 - `aggregations` (List of String) The array of aggregation types to calculate for this metric.
 - `drop` (Boolean) Set to true to skip both ingestion and aggregation and drop the metric entirely.
 - `drop_labels` (List of String) The array of labels that will be aggregated.
-- `ingest` (Boolean) Also ingest the raw series alongside the aggregated series. Note that this will increase your overall cost and is for troubleshooting purposes only.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 - `kept_labels` (List of String) The array of labels that will be kept.
 - `match_type` (String) Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.

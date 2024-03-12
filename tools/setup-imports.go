@@ -62,9 +62,6 @@ func main() {
 		if rule.AggregationDelay != "" {
 			fmt.Printf("  aggregation_delay    = \"%s\"\n", rule.AggregationDelay)
 		}
-		if rule.Ingest {
-			fmt.Printf("  ingest               = %t\n", rule.Ingest)
-		}
 		fmt.Println("}")
 		fmt.Println()
 	}
