@@ -14,8 +14,8 @@ description: |-
 
 ```terraform
 provider "grafana-adaptive-metrics" {
-  url     = "example.grafana.com"
-  api_key = "my-token"
+  url     = "https://my-prometheus-url.net"
+  api_key = "my-tenant-id:my-api-key"
 }
 ```
 
