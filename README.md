@@ -1,4 +1,4 @@
-_# Terraform Provider for Grafana Adaptive Metrics
+# Terraform Provider for Grafana Adaptive Metrics
 
 - Grafana website: https://grafana.com
 - Grafana Cloud website: https://grafana.com/products/cloud/
