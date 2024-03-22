@@ -163,7 +163,7 @@ github.com/hashicorp/terraform-plugin-docs/internal/mdplain
 github.com/hashicorp/terraform-plugin-docs/internal/provider
 github.com/hashicorp/terraform-plugin-docs/internal/tmplfuncs
 github.com/hashicorp/terraform-plugin-docs/schemamd
-# github.com/hashicorp/terraform-plugin-framework v1.6.1
+# github.com/hashicorp/terraform-plugin-framework v1.7.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-framework/attr
 github.com/hashicorp/terraform-plugin-framework/attr/xattr
@@ -174,10 +174,12 @@ github.com/hashicorp/terraform-plugin-framework/function
 github.com/hashicorp/terraform-plugin-framework/internal/fromproto5
 github.com/hashicorp/terraform-plugin-framework/internal/fromproto6
 github.com/hashicorp/terraform-plugin-framework/internal/fromtftypes
+github.com/hashicorp/terraform-plugin-framework/internal/fwfunction
 github.com/hashicorp/terraform-plugin-framework/internal/fwschema
 github.com/hashicorp/terraform-plugin-framework/internal/fwschema/fwxschema
 github.com/hashicorp/terraform-plugin-framework/internal/fwschemadata
 github.com/hashicorp/terraform-plugin-framework/internal/fwserver
+github.com/hashicorp/terraform-plugin-framework/internal/fwtype
 github.com/hashicorp/terraform-plugin-framework/internal/logging
 github.com/hashicorp/terraform-plugin-framework/internal/privatestate
 github.com/hashicorp/terraform-plugin-framework/internal/proto5server
