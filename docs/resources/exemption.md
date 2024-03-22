@@ -29,6 +29,7 @@ resource "grafana-adaptive-metrics_exemption" "ex1" {
 ### Optional
 
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
+- `reason` (String) An optional string detailing the reason(s) for this exemption.
 
 ### Read-Only
 
