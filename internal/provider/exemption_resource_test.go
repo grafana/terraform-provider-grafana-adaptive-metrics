@@ -42,6 +42,7 @@ resource "grafana-adaptive-metrics_exemption" "test" {
 resource "grafana-adaptive-metrics_exemption" "test" {
 	metric = "test_tf_metric"
 	keep_labels = ["namespace", "cluster"]
+	reason = "testing"
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -49,6 +50,7 @@ resource "grafana-adaptive-metrics_exemption" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.#", "2"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.0", "namespace"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "keep_labels.1", "cluster"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "reason", "testing"),
 				),
 			},
 			// Delete happens automatically.
