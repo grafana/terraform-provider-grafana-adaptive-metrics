@@ -18,8 +18,35 @@ func TestAccRuleResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create + Read.
+			// Create + Read an existing rule (results in an update).
 			{
+				PreConfig: func() {
+					aggRules := AggregationRulesForAccTest(t)
+					require.NoError(t, aggRules.Create(model.AggregationRule{Metric: metricName, DropLabels: []string{"foobar"}, Aggregations: []string{"sum"}}))
+				},
+				Config: providerConfig + fmt.Sprintf(`
+resource "grafana-adaptive-metrics_rule" "test" {
+	metric = "%s"
+	drop = true
+}
+`, metricName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "metric", metricName),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "match_type", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "keep_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "drop_labels.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "0"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
+				),
+			},
+			// Create + Read, no existing rule.
+			{
+				PreConfig: func() {
+					aggRules := AggregationRulesForAccTest(t)
+					require.NoError(t, aggRules.Delete(model.AggregationRule{Metric: metricName}))
+				},
 				Config: providerConfig + fmt.Sprintf(`
 resource "grafana-adaptive-metrics_rule" "test" {
 	metric = "%s"

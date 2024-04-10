@@ -116,10 +116,23 @@ func (r *ruleResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	err := r.rules.Create(plan.ToAPIReq())
+	_, err := r.rules.Read(plan.Metric.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
-		return
+		// There is no existing rule for this metric; create it.
+		err := r.rules.Create(plan.ToAPIReq())
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
+			return
+		}
+	} else {
+		// There is an existing rule for this metric; update it.
+		err := r.rules.Update(plan.ToAPIReq())
+		if err != nil {
+			resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
+			return
+		}
+
+		resp.Diagnostics.AddWarning("Existing aggregation rule for metric found", "The existing rule has been updated and imported into Terraform state; no aggregation rule has been created.")
 	}
 
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
