@@ -104,40 +104,53 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Default:     stringdefault.StaticString(""),
 				Description: "The delay until aggregation is performed.",
 			},
+
+			"auto_import": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     defaultBoolFalse{},
+				Description: "When set to true, the rule will be automatically imported if it is not already in Terraform state.",
+			},
 		},
 	}
 }
 
 func (r *ruleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan model.RuleTF
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.rules.Read(plan.Metric.ValueString())
-	if err != nil {
-		// There is no existing rule for this metric; create it.
+	if plan.AutoImport.ValueBool() {
+		_, err := r.rules.Read(plan.Metric.ValueString())
+		if err != nil {
+			// There is no existing rule for this metric; create it.
+			err := r.rules.Create(plan.ToAPIReq())
+			if err != nil {
+				resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
+				return
+			}
+		} else {
+			// There is an existing rule for this metric; update it.
+			err := r.rules.Update(plan.ToAPIReq())
+			if err != nil {
+				resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
+				return
+			}
+
+			resp.Diagnostics.AddWarning("Existing aggregation rule for metric found", "The existing rule has been updated and imported into Terraform state; no aggregation rule has been created.")
+		}
+	} else {
 		err := r.rules.Create(plan.ToAPIReq())
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
 			return
 		}
-	} else {
-		// There is an existing rule for this metric; update it.
-		err := r.rules.Update(plan.ToAPIReq())
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
-			return
-		}
-
-		resp.Diagnostics.AddWarning("Existing aggregation rule for metric found", "The existing rule has been updated and imported into Terraform state; no aggregation rule has been created.")
 	}
 
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -155,6 +168,11 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	tf := rule.ToTF()
+
+	// AutoImport is a meta field used by this Terraform provider; the API never returns
+	// a value for it so we keep it updated separately.
+	tf.AutoImport = state.AutoImport
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &tf)...)
 }
 

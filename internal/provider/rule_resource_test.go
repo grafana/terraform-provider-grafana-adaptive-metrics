@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -14,11 +15,15 @@ func TestAccRuleResource(t *testing.T) {
 	CheckAccTestsEnabled(t)
 
 	metricName := fmt.Sprintf("test_tf_metric_%s", RandString(6))
+	t.Cleanup(func() {
+		aggRules := AggregationRulesForAccTest(t)
+		_ = aggRules.Delete(model.AggregationRule{Metric: metricName})
+	})
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create + Read an existing rule (results in an update).
+			// Create + Read an existing rule w/ auto_import=false (results in an error).
 			{
 				PreConfig: func() {
 					aggRules := AggregationRulesForAccTest(t)
@@ -30,6 +35,17 @@ resource "grafana-adaptive-metrics_rule" "test" {
 	drop = true
 }
 `, metricName),
+				ExpectError: regexp.MustCompile("Unable to create aggregation rule"),
+			},
+			// Create + Read an existing rule w/ auto_import=true (results in an update).
+			{
+				Config: providerConfig + fmt.Sprintf(`
+resource "grafana-adaptive-metrics_rule" "test" {
+	metric = "%s"
+	drop = true
+	auto_import = true
+}
+`, metricName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "metric", metricName),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "match_type", ""),
@@ -39,6 +55,7 @@ resource "grafana-adaptive-metrics_rule" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregations.#", "0"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_interval", ""),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "aggregation_delay", ""),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_rule.test", "auto_import", "true"),
 				),
 			},
 			// Create + Read, no existing rule.
@@ -71,10 +88,10 @@ resource "grafana-adaptive-metrics_rule" "test" {
 				ImportStateVerify:                    true,
 				ImportStateId:                        metricName,
 				ImportStateVerifyIdentifierAttribute: "metric",
-				// The last_updated attribute does not exist in the
+				// The last_updated and auto_import attributes do not exist in the
 				// aggregations API, therefore there is no value for it during
 				// import.
-				ImportStateVerifyIgnore: []string{"last_updated"},
+				ImportStateVerifyIgnore: []string{"last_updated", "auto_import"},
 			},
 			// Update + Read.
 			{
