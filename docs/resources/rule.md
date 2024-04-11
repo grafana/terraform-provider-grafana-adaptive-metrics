@@ -38,6 +38,7 @@ resource "grafana-adaptive-metrics_rule" "prometheus_request_duration_seconds_su
 - `aggregation_delay` (String) The delay until aggregation is performed.
 - `aggregation_interval` (String) The interval at which to generate the aggregated series.
 - `aggregations` (List of String) The array of aggregation types to calculate for this metric.
+- `auto_import` (Boolean) When set to true, the rule will be automatically imported if it is not already in Terraform state.
 - `drop` (Boolean) Set to true to skip both ingestion and aggregation and drop the metric entirely.
 - `drop_labels` (List of String) The array of labels that will be aggregated.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.

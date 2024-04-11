@@ -53,6 +53,8 @@ type RuleTF struct {
 	AggregationInterval types.String `tfsdk:"aggregation_interval"`
 	AggregationDelay    types.String `tfsdk:"aggregation_delay"`
 
+	AutoImport types.Bool `tfsdk:"auto_import"`
+
 	LastUpdated types.String `tfsdk:"-"`
 }
 
