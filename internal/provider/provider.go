@@ -126,7 +126,7 @@ func (p *AdaptiveMetricsProvider) Configure(ctx context.Context, req provider.Co
 
 	apiURL := getStringOverriddenByEnvOrDefault(cfg.URL, "GRAFANA_AM_API_URL", "")
 	if apiURL == "" {
-		resp.Diagnostics.AddError("Missing required attribute", "url")
+		resp.Diagnostics.AddError("Missing required attribute 'url'", "This may alternatively be set via the `GRAFANA_AM_API_URL` environment variable.")
 		return
 	}
 
