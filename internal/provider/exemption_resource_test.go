@@ -53,6 +53,19 @@ resource "grafana-adaptive-metrics_exemption" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "reason", "testing"),
 				),
 			},
+			// Update + Read, setting disable_recommendations=true
+			{
+				Config: providerConfig + `
+resource "grafana-adaptive-metrics_exemption" "test" {
+	metric = "test_tf_metric"
+	disable_recommendations = true
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "metric", "test_tf_metric"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_exemption.test", "disable_recommendations", "true"),
+				),
+			},
 			// Delete happens automatically.
 		},
 	})

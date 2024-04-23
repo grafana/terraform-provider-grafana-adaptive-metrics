@@ -68,6 +68,12 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Default:     defaultEmptyList{},
 				Description: "The array of labels to keep; labels not in this array will be aggregated.",
 			},
+			"disable_recommendations": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     defaultBoolFalse{},
+				Description: "When set to true, the recommendations service will exempt this metric from consideration.",
+			},
 			"reason": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
