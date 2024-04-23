@@ -72,7 +72,7 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Optional:    true,
 				Computed:    true,
 				Default:     defaultBoolFalse{},
-				Description: "When set to true, the recommendations service will exempt this metric from consideration. When set to false, the recommendations service will consider this metric to be exempt from aggregation.",
+				Description: "When set to true, the recommendations service will exempt this metric from consideration.",
 			},
 			"reason": schema.StringAttribute{
 				Optional:    true,
