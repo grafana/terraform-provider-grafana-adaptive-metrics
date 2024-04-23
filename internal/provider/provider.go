@@ -97,7 +97,7 @@ func (p *AdaptiveMetricsProvider) Schema(_ context.Context, _ provider.SchemaReq
 			"api_key": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Access Policy Token (or API key) for Grafana Cloud. May alternatively be set via the `GRAFANA_AM_API_KEY` environment variable.",
+				MarkdownDescription: "Tenant ID and Access Policy Token (or API key) for Grafana Cloud in the format '<tenant-id>:<token-or-api-key>'. May alternatively be set via the `GRAFANA_AM_API_KEY` environment variable.",
 			},
 			"http_headers": schema.MapAttribute{
 				Optional:            true,
