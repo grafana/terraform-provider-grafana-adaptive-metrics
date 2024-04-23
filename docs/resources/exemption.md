@@ -28,6 +28,7 @@ resource "grafana-adaptive-metrics_exemption" "ex1" {
 
 ### Optional
 
+- `disable_recommendations` (Boolean) When set to true, the recommendations service will exempt this metric from consideration. When set to false, the recommendations service will consider this metric to be exempt from aggregation.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 - `reason` (String) An optional string detailing the reason(s) for this exemption.
 
