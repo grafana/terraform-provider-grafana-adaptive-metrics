@@ -24,6 +24,22 @@ func (d defaultBoolFalse) DefaultBool(_ context.Context, _ defaults.BoolRequest,
 	resp.PlanValue = types.BoolValue(false)
 }
 
+type defaultBoolTrue struct{}
+
+var _ defaults.Bool = defaultBoolTrue{}
+
+func (d defaultBoolTrue) Description(_ context.Context) string {
+	return "value defaults to true"
+}
+
+func (d defaultBoolTrue) MarkdownDescription(_ context.Context) string {
+	return "value defaults to true"
+}
+
+func (d defaultBoolTrue) DefaultBool(_ context.Context, _ defaults.BoolRequest, resp *defaults.BoolResponse) {
+	resp.PlanValue = types.BoolValue(true)
+}
+
 type defaultEmptyList struct{}
 
 var _ defaults.List = defaultEmptyList{}
