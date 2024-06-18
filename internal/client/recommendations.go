@@ -12,9 +12,12 @@ const (
 	recommendationsConfigEndpoint = "/aggregations/recommendations/config"
 )
 
-func (c *Client) AggregationRecommendations(verbose bool, action []string) ([]model.AggregationRecommendation, error) {
+func (c *Client) AggregationRecommendations(segmentID string, verbose bool, action []string) ([]model.AggregationRecommendation, error) {
 	var recs []model.AggregationRecommendation
 	params := url.Values{}
+	if segmentID != "" {
+		params.Add("segment", segmentID)
+	}
 	if verbose {
 		params.Add("verbose", "true")
 	}

@@ -108,10 +108,28 @@ func TestAggregationRecommendations(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations(false, nil)
+	actual, err := c.AggregationRecommendations("", false, nil)
 	require.NoError(t, err)
 
 	require.Equal(t, recsPayload, actual)
+}
+
+func TestAggregationSegmentedRecommendations(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	s.addExpected("GET", "/aggregations/recommendations",
+		withRespBody(minifiedVerboseJson),
+		withParams(url.Values{"verbose": []string{"true"}, "segment": []string{"segment-id"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.AggregationRecommendations("segment-id", true, nil)
+	require.NoError(t, err)
+
+	require.Equal(t, verboseRecsPayload, actual)
 }
 
 func TestAggregationVerboseRecommendations(t *testing.T) {
@@ -126,7 +144,7 @@ func TestAggregationVerboseRecommendations(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations(true, nil)
+	actual, err := c.AggregationRecommendations("", true, nil)
 	require.NoError(t, err)
 
 	require.Equal(t, verboseRecsPayload, actual)
@@ -144,7 +162,7 @@ func TestAggregationRecommendationsWithAction(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations(false, []string{"add", "update"})
+	actual, err := c.AggregationRecommendations("", false, []string{"add", "update"})
 	require.NoError(t, err)
 
 	require.Equal(t, recsPayload, actual)

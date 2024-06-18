@@ -49,6 +49,10 @@ func (r *recommendationDatasource) Metadata(_ context.Context, req datasource.Me
 func (r *recommendationDatasource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"segment": schema.StringAttribute{
+				Optional:    true,
+				Description: "The name of the segment to get recommendations for.",
+			},
 			"verbose": schema.BoolAttribute{
 				Optional:    true,
 				Description: "If true, the response will include additional information about the recommendation, such as the number of rules, queries, and dashboards that use the metric.",
@@ -147,7 +151,7 @@ func (r *recommendationDatasource) Read(ctx context.Context, req datasource.Read
 	var state model.AggregationRecommendationListTF
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 
-	recs, err := r.client.AggregationRecommendations(state.IsVerbose(), state.GetActionIn())
+	recs, err := r.client.AggregationRecommendations(state.Segment.ValueString(), state.IsVerbose(), state.GetActionIn())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read aggregation rule", err.Error())
 		return
