@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"sync"
 
 	"github.com/hashicorp/go-cleanhttp"
 )
@@ -18,6 +19,10 @@ type Client struct {
 	Cfg     *Config
 	BaseURL url.URL
 	client  *http.Client
+
+	// This mutex is necessary for now because the API does not support
+	// concurrent writes to the segments endpoint.
+	segmentMutex *sync.Mutex
 }
 
 // Config contains client configuration.
@@ -44,6 +49,8 @@ func New(baseURL string, cfg *Config) (*Client, error) {
 		Cfg:     cfg,
 		BaseURL: *u,
 		client:  cfg.HttpClient,
+
+		segmentMutex: &sync.Mutex{},
 	}, nil
 }
 

@@ -13,41 +13,34 @@ const (
 )
 
 func (c *Client) CreateSegment(s model.Segment) (model.Segment, error) {
-	fmt.Println("CreateSegment", s)
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
+
 	body, err := json.Marshal(s)
 	if err != nil {
 		return model.Segment{}, err
 	}
 
-	fmt.Println("CreateSegment", string(body))
-
-	err = c.request("POST", segmentsEndpoint, nil, body, nil)
+	var resp model.Segment
+	err = c.request("POST", segmentsEndpoint, nil, body, &resp)
 	if err != nil {
 		return model.Segment{}, err
 	}
 
-	// TODO: modify API to return created segment
-	allSegments, err := c.ListSegments()
-	if err != nil {
-		return model.Segment{}, err
-	}
-
-	for _, segment := range allSegments {
-		if segment.Selector == s.Selector {
-			return segment, nil
-		}
-	}
-
-	return model.Segment{}, fmt.Errorf("segment not found after creation")
+	return resp, nil
 }
 
 func (c *Client) ReadSegment(id string) (model.Segment, error) {
-	allSegments, err := c.ListSegments()
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
+
+	resp := []model.Segment{}
+	err := c.request("GET", segmentsEndpoint, nil, nil, &resp)
 	if err != nil {
 		return model.Segment{}, err
 	}
 
-	for _, segment := range allSegments {
+	for _, segment := range resp {
 		if segment.ID == id {
 			return segment, nil
 		}
@@ -57,32 +50,26 @@ func (c *Client) ReadSegment(id string) (model.Segment, error) {
 }
 
 func (c *Client) UpdateSegment(s model.Segment) error {
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
+
 	body, err := json.Marshal(s)
 	if err != nil {
 		return err
 	}
 
-	return c.request("PUT", segmentsEndpoint, nil, body, nil)
+	params := url.Values{
+		"segment": []string{s.ID},
+	}
+	return c.request("PUT", segmentsEndpoint, params, body, nil)
 }
 
-func (c *Client) DeleteSegment(selector string) error {
+func (c *Client) DeleteSegment(id string) error {
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
+
 	params := url.Values{
-		"segment": []string{selector},
+		"segment": []string{id},
 	}
 	return c.request("DELETE", segmentsEndpoint, params, nil, nil)
-}
-
-func (c *Client) ListSegments() ([]model.Segment, error) {
-	resp := []model.Segment{}
-
-	err := c.request("GET", segmentsEndpoint, nil, nil, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
-
-type SegmentResp struct {
-	Result model.Segment `json:"result"`
 }

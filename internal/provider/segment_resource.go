@@ -142,16 +142,16 @@ func (e *segmentResource) Update(ctx context.Context, req resource.UpdateRequest
 }
 
 func (e *segmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// var state model.SegmentTF
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	var state model.SegmentTF
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// err := e.client.DeleteSegment(state.Selector.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Unable to delete segment", err.Error())
-	// }
+	err := e.client.DeleteSegment(state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to delete segment", err.Error())
+	}
 }
 
 func (e *segmentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
