@@ -219,7 +219,7 @@ func TestAggregationRules(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actualRules, actualEtag, err := c.AggregationRules()
+	actualRules, actualEtag, err := c.AggregationRules("")
 	require.NoError(t, err)
 
 	require.Equal(t, etag, actualEtag)
@@ -247,7 +247,7 @@ func TestUpdateAggregationRules(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.UpdateAggregationRules(rulesPayload, etag)
+	newEtag, err := c.UpdateAggregationRules("", rulesPayload, etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)
@@ -273,7 +273,7 @@ func TestCreateAggregationRule(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.CreateAggregationRule(model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
+	newEtag, err := c.CreateAggregationRule("", model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)
@@ -295,7 +295,7 @@ func TestReadAggregationRule(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, newEtag, err := c.ReadAggregationRule("test_metric")
+	actual, newEtag, err := c.ReadAggregationRule("", "test_metric")
 	require.NoError(t, err)
 
 	require.Equal(t, etag, newEtag)
@@ -322,7 +322,7 @@ func TestUpdateAggregationRule(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.UpdateAggregationRule(model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
+	newEtag, err := c.UpdateAggregationRule("", model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)
@@ -347,7 +347,7 @@ func TestDeleteAggregationRule(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.DeleteAggregationRule("test_metric", etag)
+	newEtag, err := c.DeleteAggregationRule("", "test_metric", etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)

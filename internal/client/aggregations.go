@@ -13,7 +13,7 @@ const (
 	aggregationRuleEndpoint  = "/aggregations/rule/%s"
 )
 
-func (c *Client) AggregationRules() ([]model.AggregationRule, string, error) {
+func (c *Client) AggregationRules(segmentID string) ([]model.AggregationRule, string, error) {
 	var rules []model.AggregationRule
 	header, err := c.requestWithHeaders("GET", aggregationRulesEndpoint, nil, nil, nil, &rules)
 	if err != nil {
@@ -28,7 +28,7 @@ func (c *Client) AggregationRules() ([]model.AggregationRule, string, error) {
 	return rules, etag, err
 }
 
-func (c *Client) UpdateAggregationRules(rules []model.AggregationRule, etag string) (string, error) {
+func (c *Client) UpdateAggregationRules(segmentID string, rules []model.AggregationRule, etag string) (string, error) {
 	body, err := json.Marshal(rules)
 	if err != nil {
 		return "", err
@@ -50,7 +50,7 @@ func (c *Client) UpdateAggregationRules(rules []model.AggregationRule, etag stri
 	return newEtag, nil
 }
 
-func (c *Client) CreateAggregationRule(rule model.AggregationRule, etag string) (string, error) {
+func (c *Client) CreateAggregationRule(segmentID string, rule model.AggregationRule, etag string) (string, error) {
 	body, err := json.Marshal(rule)
 	if err != nil {
 		return "", err
@@ -74,7 +74,7 @@ func (c *Client) CreateAggregationRule(rule model.AggregationRule, etag string) 
 	return newEtag, nil
 }
 
-func (c *Client) ReadAggregationRule(metric string) (model.AggregationRule, string, error) {
+func (c *Client) ReadAggregationRule(segmentID string, metric string) (model.AggregationRule, string, error) {
 	rule := model.AggregationRule{}
 	endpoint := fmt.Sprintf(aggregationRuleEndpoint, metric)
 
@@ -91,7 +91,7 @@ func (c *Client) ReadAggregationRule(metric string) (model.AggregationRule, stri
 	return rule, newEtag, nil
 }
 
-func (c *Client) UpdateAggregationRule(rule model.AggregationRule, etag string) (string, error) {
+func (c *Client) UpdateAggregationRule(segmentID string, rule model.AggregationRule, etag string) (string, error) {
 	body, err := json.Marshal(rule)
 	if err != nil {
 		return "", err
@@ -115,7 +115,7 @@ func (c *Client) UpdateAggregationRule(rule model.AggregationRule, etag string) 
 	return newEtag, nil
 }
 
-func (c *Client) DeleteAggregationRule(metric, etag string) (string, error) {
+func (c *Client) DeleteAggregationRule(segmentID string, metric, etag string) (string, error) {
 	reqHeader := make(http.Header)
 	reqHeader.Add("If-Match", etag)
 

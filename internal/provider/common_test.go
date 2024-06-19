@@ -48,7 +48,7 @@ func AggregationRulesForAccTest(t *testing.T) *AggregationRules {
 	})
 	require.NoError(t, err)
 
-	aggRules := NewAggregationRules(c)
+	aggRules := NewAggregationRules(c, "")
 	require.NoError(t, aggRules.Init())
 
 	return aggRules

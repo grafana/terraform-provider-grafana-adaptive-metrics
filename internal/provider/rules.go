@@ -24,7 +24,7 @@ func (r *AggregationRules) Init() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	rules, etag, err := r.client.AggregationRules()
+	rules, etag, err := r.client.AggregationRules(r.segmentID)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (r *AggregationRules) Create(rule model.AggregationRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	etag, err := r.client.CreateAggregationRule(rule, r.etag)
+	etag, err := r.client.CreateAggregationRule(r.segmentID, rule, r.etag)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (r *AggregationRules) Update(rule model.AggregationRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	etag, err := r.client.UpdateAggregationRule(rule, r.etag)
+	etag, err := r.client.UpdateAggregationRule(r.segmentID, rule, r.etag)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (r *AggregationRules) Delete(rule model.AggregationRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	etag, err := r.client.DeleteAggregationRule(rule.Metric, r.etag)
+	etag, err := r.client.DeleteAggregationRule(r.segmentID, rule.Metric, r.etag)
 	if err != nil {
 		return err
 	}

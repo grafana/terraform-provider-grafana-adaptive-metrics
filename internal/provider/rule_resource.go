@@ -189,7 +189,7 @@ func (r *ruleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	if plan.Metric.ValueString() != state.Metric.ValueString() {
+	if plan.TFIdentifier() != state.TFIdentifier() {
 		err := r.rules.Delete(state.ToAPIReq())
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
