@@ -16,6 +16,8 @@ var (
 	minifiedJson        = []byte(`[{"metric":"kube_persistentvolumeclaim_created","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"]},{"metric":"kube_persistentvolumeclaim_resource_requests_storage_bytes","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"]}]`)
 	minifiedVerboseJson = []byte(`[{"metric":"kube_persistentvolumeclaim_created","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"],"recommended_action":"keep"},{"metric":"kube_persistentvolumeclaim_resource_requests_storage_bytes","drop_labels":["persistentvolumeclaim"],"aggregations":["count","sum"],"recommended_action":"update"}]`)
 
+	segmentedMinified = []byte(`[{"segment":{"name":"segmentname","id":"segmentid"},"rules":` + string(minifiedJson) + `}]`)
+
 	rulesPayload = []model.AggregationRule{
 		{
 			Metric:       "kube_persistentvolumeclaim_created",
@@ -207,50 +209,17 @@ func TestAggregationRules(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	const etag = "\"fake-etag\""
-	header := make(http.Header)
-	header.Set("Etag", etag)
-
-	s.addExpected("GET", "/aggregations/rules",
-		withRespHeader(header),
-		withRespBody(minifiedJson),
+	s.addExpected("GET", "/aggregations/segmented_rules",
+		withRespBody(segmentedMinified),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actualRules, actualEtag, err := c.AggregationRules("")
+	actualRules, err := c.SegmentedAggregationRules()
 	require.NoError(t, err)
 
-	require.Equal(t, etag, actualEtag)
-
-	require.Equal(t, rulesPayload, actualRules)
-}
-
-func TestUpdateAggregationRules(t *testing.T) {
-	s := newMockServer(t)
-	defer s.close()
-
-	const etag = "\"fake-etag\""
-	expectedHeader := make(http.Header)
-	expectedHeader.Set("If-Match", etag)
-
-	respHeader := make(http.Header)
-	respHeader.Set("ETag", "\"updated-fake-etag\"")
-
-	s.addExpected("POST", "/aggregations/rules",
-		withReqHeader(expectedHeader),
-		withReqBody(minifiedJson),
-		withRespHeader(respHeader),
-	)
-
-	c, err := New(s.server.URL, &Config{})
-	require.NoError(t, err)
-
-	newEtag, err := c.UpdateAggregationRules("", rulesPayload, etag)
-	require.NoError(t, err)
-
-	require.Equal(t, "\"updated-fake-etag\"", newEtag)
+	require.Equal(t, rulesPayload, actualRules[0].Rules)
 }
 
 func TestCreateAggregationRule(t *testing.T) {
@@ -268,12 +237,13 @@ func TestCreateAggregationRule(t *testing.T) {
 		withReqHeader(expectedHeader),
 		withReqBody([]byte(`{"metric":"test_metric","drop":true}`)),
 		withRespHeader(respHeader),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.CreateAggregationRule("", model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
+	newEtag, err := c.CreateAggregationRule("segment-id", model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)
@@ -290,12 +260,13 @@ func TestReadAggregationRule(t *testing.T) {
 	s.addExpected("GET", "/aggregations/rule/test_metric",
 		withRespHeader(respHeader),
 		withRespBody([]byte(`{"metric":"test_metric","drop":true}`)),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, newEtag, err := c.ReadAggregationRule("", "test_metric")
+	actual, newEtag, err := c.ReadAggregationRule("segment-id", "test_metric")
 	require.NoError(t, err)
 
 	require.Equal(t, etag, newEtag)
@@ -317,12 +288,13 @@ func TestUpdateAggregationRule(t *testing.T) {
 		withReqHeader(expectedHeader),
 		withReqBody([]byte(`{"metric":"test_metric","drop":true}`)),
 		withRespHeader(respHeader),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.UpdateAggregationRule("", model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
+	newEtag, err := c.UpdateAggregationRule("segment-id", model.AggregationRule{Metric: "test_metric", Drop: true}, etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)
@@ -342,12 +314,13 @@ func TestDeleteAggregationRule(t *testing.T) {
 	s.addExpected("DELETE", "/aggregations/rule/test_metric",
 		withReqHeader(expectedHeader),
 		withRespHeader(respHeader),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	newEtag, err := c.DeleteAggregationRule("", "test_metric", etag)
+	newEtag, err := c.DeleteAggregationRule("segment-id", "test_metric", etag)
 	require.NoError(t, err)
 
 	require.Equal(t, "\"updated-fake-etag\"", newEtag)

@@ -17,7 +17,7 @@ func TestAccRuleResource(t *testing.T) {
 	metricName := fmt.Sprintf("test_tf_metric_%s", RandString(6))
 	t.Cleanup(func() {
 		aggRules := AggregationRulesForAccTest(t)
-		_ = aggRules.Delete(model.AggregationRule{Metric: metricName})
+		_ = aggRules.Delete("", model.AggregationRule{Metric: metricName})
 	})
 
 	resource.Test(t, resource.TestCase{
@@ -27,7 +27,7 @@ func TestAccRuleResource(t *testing.T) {
 			{
 				PreConfig: func() {
 					aggRules := AggregationRulesForAccTest(t)
-					require.NoError(t, aggRules.Create(model.AggregationRule{Metric: metricName, DropLabels: []string{"foobar"}, Aggregations: []string{"sum"}}))
+					require.NoError(t, aggRules.Create("", model.AggregationRule{Metric: metricName, DropLabels: []string{"foobar"}, Aggregations: []string{"sum"}}))
 				},
 				Config: providerConfig + fmt.Sprintf(`
 resource "grafana-adaptive-metrics_rule" "test" {
@@ -62,7 +62,7 @@ resource "grafana-adaptive-metrics_rule" "test" {
 			{
 				PreConfig: func() {
 					aggRules := AggregationRulesForAccTest(t)
-					require.NoError(t, aggRules.Delete(model.AggregationRule{Metric: metricName}))
+					require.NoError(t, aggRules.Delete("", model.AggregationRule{Metric: metricName}))
 				},
 				Config: providerConfig + fmt.Sprintf(`
 resource "grafana-adaptive-metrics_rule" "test" {
@@ -120,7 +120,7 @@ resource "grafana-adaptive-metrics_rule" "test" {
 			{
 				PreConfig: func() {
 					aggRules := AggregationRulesForAccTest(t)
-					require.NoError(t, aggRules.Delete(model.AggregationRule{Metric: metricName}))
+					require.NoError(t, aggRules.Delete("", model.AggregationRule{Metric: metricName}))
 				},
 				Config: providerConfig + fmt.Sprintf(`
 resource "grafana-adaptive-metrics_rule" "test" {

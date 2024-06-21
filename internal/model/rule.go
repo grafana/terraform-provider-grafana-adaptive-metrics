@@ -8,6 +8,12 @@ import (
 
 const managedByTF = "terraform"
 
+type SegmentedRuleSet struct {
+	Etag    string            `json:"etag"`
+	Segment Segment           `json:"segment"`
+	Rules   []AggregationRule `json:"rules"`
+}
+
 type AggregationRule struct {
 	Metric    string `json:"metric"`
 	MatchType string `json:"match_type,omitempty"`
