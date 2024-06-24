@@ -30,6 +30,19 @@ func (c *Client) CreateSegment(s model.Segment) (model.Segment, error) {
 	return resp, nil
 }
 
+func (c *Client) ListSegments() ([]model.Segment, error) {
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
+
+	resp := []model.Segment{}
+	err := c.request("GET", segmentsEndpoint, nil, nil, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 func (c *Client) ReadSegment(id string) (model.Segment, error) {
 	c.segmentMutex.Lock()
 	defer c.segmentMutex.Unlock()

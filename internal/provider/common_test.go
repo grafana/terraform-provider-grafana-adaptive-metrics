@@ -37,7 +37,7 @@ func RandString(n int) string {
 	return string(b)
 }
 
-func AggregationRulesForAccTest(t *testing.T) *AggregationRules {
+func ClientForAccTest(t *testing.T) *client.Client {
 	t.Helper()
 
 	apiURL := os.Getenv("GRAFANA_AM_API_URL")
@@ -47,6 +47,14 @@ func AggregationRulesForAccTest(t *testing.T) *AggregationRules {
 		APIKey: apiKey,
 	})
 	require.NoError(t, err)
+
+	return c
+}
+
+func AggregationRulesForAccTest(t *testing.T) *AggregationRules {
+	t.Helper()
+
+	c := ClientForAccTest(t)
 
 	aggRules := NewAggregationRules(c)
 	require.NoError(t, aggRules.Init())

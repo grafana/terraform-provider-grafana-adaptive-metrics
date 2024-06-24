@@ -4,10 +4,22 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAccSegmentResource(t *testing.T) {
 	CheckAccTestsEnabled(t)
+
+	t.Cleanup(func() {
+		c := ClientForAccTest(t)
+		segments, err := c.ListSegments()
+		require.NoError(t, err)
+
+		for _, s := range segments {
+			err = c.DeleteSegment(s.ID)
+			require.NoError(t, err)
+		}
+	})
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
