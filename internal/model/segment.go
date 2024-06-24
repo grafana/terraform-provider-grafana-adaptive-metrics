@@ -5,7 +5,7 @@ import (
 )
 
 type Segment struct {
-	ID                string `json:"id,omitempty"`
+	ID                string `json:"id"`
 	Name              string `json:"name"`
 	Selector          string `json:"selector"`
 	FallbackToDefault bool   `json:"fallback_to_default"`

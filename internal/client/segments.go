@@ -13,13 +13,13 @@ const (
 )
 
 func (c *Client) CreateSegment(s model.Segment) (model.Segment, error) {
-	c.segmentMutex.Lock()
-	defer c.segmentMutex.Unlock()
-
 	body, err := json.Marshal(s)
 	if err != nil {
 		return model.Segment{}, err
 	}
+
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
 
 	var resp model.Segment
 	err = c.request("POST", segmentsEndpoint, nil, body, &resp)
@@ -50,13 +50,13 @@ func (c *Client) ReadSegment(id string) (model.Segment, error) {
 }
 
 func (c *Client) UpdateSegment(s model.Segment) error {
-	c.segmentMutex.Lock()
-	defer c.segmentMutex.Unlock()
-
 	body, err := json.Marshal(s)
 	if err != nil {
 		return err
 	}
+
+	c.segmentMutex.Lock()
+	defer c.segmentMutex.Unlock()
 
 	params := url.Values{
 		"segment": []string{s.ID},

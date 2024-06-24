@@ -51,7 +51,7 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "A UILD that uniquely identifies the segment.",
+				Description: "A ULID that uniquely identifies the segment.",
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -79,13 +79,13 @@ func (e *segmentResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	s, err := e.client.CreateSegment(plan.ToAPIReq())
+	segment, err := e.client.CreateSegment(plan.ToAPIReq())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create segment", err.Error())
 		return
 	}
 
-	state := s.ToTF()
+	state := segment.ToTF()
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -97,14 +97,14 @@ func (e *segmentResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	ex, err := e.client.ReadSegment(state.ID.ValueString())
+	segment, err := e.client.ReadSegment(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read segment", err.Error())
 		return
 	}
 
-	tf := ex.ToTF()
-	resp.Diagnostics.Append(resp.State.Set(ctx, &tf)...)
+	state = segment.ToTF()
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (e *segmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -122,22 +122,22 @@ func (e *segmentResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	ex := plan.ToAPIReq()
-	ex.ID = state.ID.ValueString()
+	segment := plan.ToAPIReq()
+	segment.ID = state.ID.ValueString()
 
-	err := e.client.UpdateSegment(ex)
+	err := e.client.UpdateSegment(segment)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update segment", err.Error())
 		return
 	}
 
-	ex, err = e.client.ReadSegment(state.ID.ValueString())
+	segment, err = e.client.ReadSegment(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read segment after updating", err.Error())
 		return
 	}
 
-	state = ex.ToTF()
+	state = segment.ToTF()
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
