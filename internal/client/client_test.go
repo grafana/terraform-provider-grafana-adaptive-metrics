@@ -108,10 +108,28 @@ func TestAggregationRecommendations(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations(false, nil)
+	actual, err := c.AggregationRecommendations("", false, nil)
 	require.NoError(t, err)
 
 	require.Equal(t, recsPayload, actual)
+}
+
+func TestAggregationSegmentedRecommendations(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	s.addExpected("GET", "/aggregations/recommendations",
+		withRespBody(minifiedVerboseJson),
+		withParams(url.Values{"verbose": []string{"true"}, "segment": []string{"segment-id"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.AggregationRecommendations("segment-id", true, nil)
+	require.NoError(t, err)
+
+	require.Equal(t, verboseRecsPayload, actual)
 }
 
 func TestAggregationVerboseRecommendations(t *testing.T) {
@@ -126,7 +144,7 @@ func TestAggregationVerboseRecommendations(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations(true, nil)
+	actual, err := c.AggregationRecommendations("", true, nil)
 	require.NoError(t, err)
 
 	require.Equal(t, verboseRecsPayload, actual)
@@ -144,7 +162,7 @@ func TestAggregationRecommendationsWithAction(t *testing.T) {
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.AggregationRecommendations(false, []string{"add", "update"})
+	actual, err := c.AggregationRecommendations("", false, []string{"add", "update"})
 	require.NoError(t, err)
 
 	require.Equal(t, recsPayload, actual)
@@ -424,5 +442,100 @@ func TestDeleteExemption(t *testing.T) {
 	require.NoError(t, err)
 
 	err = c.DeleteExemption("generated-ulid")
+	require.NoError(t, err)
+}
+
+func TestCreateSegment(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	reqBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
+	respBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"id":"generated-ulid"}`)
+
+	s.addExpected("POST", "/aggregations/rules/segments",
+		withReqBody(reqBody),
+		withRespBody(respBody),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.CreateSegment(model.Segment{
+		Name:              "segment name",
+		Selector:          "{foo=\"bar\"}",
+		FallbackToDefault: true,
+	})
+	require.NoError(t, err)
+
+	expected := model.Segment{
+		ID:                "generated-ulid",
+		Name:              "segment name",
+		Selector:          "{foo=\"bar\"}",
+		FallbackToDefault: true,
+	}
+
+	require.Equal(t, expected, actual)
+}
+
+func TestReadSegment(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	respBody := []byte(`[{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"id":"generated-ulid"}]`)
+	expected := model.Segment{
+		ID:                "generated-ulid",
+		Name:              "segment name",
+		Selector:          "{foo=\"bar\"}",
+		FallbackToDefault: true,
+	}
+
+	s.addExpected("GET", "/aggregations/rules/segments",
+		withRespBody(respBody),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, err := c.ReadSegment("generated-ulid")
+	require.NoError(t, err)
+
+	require.Equal(t, expected, actual)
+}
+
+func TestUpdateSegment(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	reqBody := []byte(`{"id":"generated-ulid","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
+
+	s.addExpected("PUT", "/aggregations/rules/segments",
+		withReqBody(reqBody),
+		withParams(url.Values{"segment": []string{"generated-ulid"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	err = c.UpdateSegment(model.Segment{
+		ID:                "generated-ulid",
+		Name:              "segment name",
+		Selector:          "{foo=\"bar\"}",
+		FallbackToDefault: true,
+	})
+	require.NoError(t, err)
+}
+
+func TestDeleteSegment(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	s.addExpected("DELETE", "/aggregations/rules/segments",
+		withParams(url.Values{"segment": []string{"generated-ulid"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	err = c.DeleteSegment("generated-ulid")
 	require.NoError(t, err)
 }
