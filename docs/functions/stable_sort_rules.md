@@ -15,7 +15,6 @@ Sort a list of rules in a stable order to prevent unnecessary updates in a rules
 ```terraform
 # Apply the latest recommendations on each apply
 data "grafana-adaptive-metrics_recommendations" "default" {
-  verbose = true
 }
 
 resource "grafana-adaptive-metrics_ruleset" "default" {
