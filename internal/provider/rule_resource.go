@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
@@ -55,10 +57,16 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"segment": schema.StringAttribute{
 				Optional:    true,
 				Description: "The name of the segment to aggregate metrics for.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"metric": schema.StringAttribute{
 				Required:    true,
 				Description: "The name of the metric to be aggregated.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"match_type": schema.StringAttribute{
 				Optional:    true,
@@ -197,24 +205,10 @@ func (r *ruleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	if plan.TFIdentifier() != state.TFIdentifier() {
-		err := r.rules.Delete(state.Segment.ValueString(), state.ToAPIReq())
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
-			return
-		}
-
-		err = r.rules.Create(plan.Segment.ValueString(), plan.ToAPIReq())
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
-			return
-		}
-	} else {
-		err := r.rules.Update(plan.Segment.ValueString(), plan.ToAPIReq())
-		if err != nil {
-			resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
-			return
-		}
+	err := r.rules.Update(plan.Segment.ValueString(), plan.ToAPIReq())
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
+		return
 	}
 
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
