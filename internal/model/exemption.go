@@ -30,6 +30,7 @@ func (e Exemption) ToTF() ExemptionTF {
 }
 
 type ExemptionTF struct {
+	Segment                types.String   `tfsdk:"segment"`
 	ID                     types.String   `tfsdk:"id"`
 	Metric                 types.String   `tfsdk:"metric"`
 	KeepLabels             []types.String `tfsdk:"keep_labels"`

@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
@@ -12,7 +13,7 @@ const (
 	exemptionEndpoint  = "/v1/recommendations/exemptions/%s"
 )
 
-func (c *Client) CreateExemption(ex model.Exemption) (model.Exemption, error) {
+func (c *Client) CreateExemption(segmentID string, ex model.Exemption) (model.Exemption, error) {
 	body, err := json.Marshal(ex)
 	if err != nil {
 		return model.Exemption{}, err
@@ -20,7 +21,11 @@ func (c *Client) CreateExemption(ex model.Exemption) (model.Exemption, error) {
 
 	resp := exemptionResp{}
 
-	err = c.request("POST", exemptionsEndpoint, nil, body, &resp)
+	params := url.Values{
+		"segment": {segmentID},
+	}
+
+	err = c.request("POST", exemptionsEndpoint, params, body, &resp)
 	if err != nil {
 		return model.Exemption{}, err
 	}
@@ -28,44 +33,39 @@ func (c *Client) CreateExemption(ex model.Exemption) (model.Exemption, error) {
 	return resp.Result, nil
 }
 
-func (c *Client) ReadExemption(exID string) (model.Exemption, error) {
+func (c *Client) ReadExemption(segmentID string, exID string) (model.Exemption, error) {
 	resp := exemptionResp{}
 	endpoint := fmt.Sprintf(exemptionEndpoint, exID)
+	params := url.Values{
+		"segment": {segmentID},
+	}
 
-	err := c.request("GET", endpoint, nil, nil, &resp)
+	err := c.request("GET", endpoint, params, nil, &resp)
 	return resp.Result, err
 }
 
-func (c *Client) UpdateExemption(ex model.Exemption) error {
+func (c *Client) UpdateExemption(segmentID string, ex model.Exemption) error {
 	body, err := json.Marshal(ex)
 	if err != nil {
 		return err
 	}
-
-	endpoint := fmt.Sprintf(exemptionEndpoint, ex.ID)
-	return c.request("PUT", endpoint, nil, body, nil)
-}
-
-func (c *Client) DeleteExemption(exID string) error {
-	endpoint := fmt.Sprintf(exemptionEndpoint, exID)
-	return c.request("DELETE", endpoint, nil, nil, nil)
-}
-
-func (c *Client) ListExemptions() ([]model.Exemption, error) {
-	resp := exemptionsResp{}
-
-	err := c.request("GET", exemptionsEndpoint, nil, nil, &resp)
-	if err != nil {
-		return nil, err
+	params := url.Values{
+		"segment": {segmentID},
 	}
 
-	return resp.Result, nil
+	endpoint := fmt.Sprintf(exemptionEndpoint, ex.ID)
+	return c.request("PUT", endpoint, params, body, nil)
+}
+
+func (c *Client) DeleteExemption(segmentID string, exID string) error {
+	endpoint := fmt.Sprintf(exemptionEndpoint, exID)
+	params := url.Values{
+		"segment": {segmentID},
+	}
+
+	return c.request("DELETE", endpoint, params, nil, nil)
 }
 
 type exemptionResp struct {
 	Result model.Exemption `json:"result"`
-}
-
-type exemptionsResp struct {
-	Result []model.Exemption `json:"result"`
 }

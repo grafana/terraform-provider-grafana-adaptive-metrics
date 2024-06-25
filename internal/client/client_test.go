@@ -336,12 +336,13 @@ func TestCreateExemption(t *testing.T) {
 	s.addExpected("POST", "/v1/recommendations/exemptions",
 		withReqBody(reqBody),
 		withRespBody(respBody),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.CreateExemption(model.Exemption{
+	actual, err := c.CreateExemption("segment-id", model.Exemption{
 		Metric:     "test_metric",
 		KeepLabels: []string{"foobar"},
 	})
@@ -373,12 +374,13 @@ func TestReadExemption(t *testing.T) {
 
 	s.addExpected("GET", "/v1/recommendations/exemptions/generated-ulid",
 		withRespBody(respBody),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	actual, err := c.ReadExemption("generated-ulid")
+	actual, err := c.ReadExemption("segment-id", "generated-ulid")
 	require.NoError(t, err)
 
 	require.Equal(t, expected, actual)
@@ -392,12 +394,13 @@ func TestUpdateExemption(t *testing.T) {
 
 	s.addExpected("PUT", "/v1/recommendations/exemptions/generated-ulid",
 		withReqBody(reqBody),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
 	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	err = c.UpdateExemption(model.Exemption{
+	err = c.UpdateExemption("segment-id", model.Exemption{
 		ID:         "generated-ulid",
 		Metric:     "test_metric",
 		KeepLabels: []string{"foobar"},
@@ -409,12 +412,14 @@ func TestDeleteExemption(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	s.addExpected("DELETE", "/v1/recommendations/exemptions/generated-ulid")
+	s.addExpected("DELETE", "/v1/recommendations/exemptions/generated-ulid",
+		withParams(url.Values{"segment": []string{"segment-id"}}),
+	)
 
 	c, err := New(s.server.URL, &Config{})
 	require.NoError(t, err)
 
-	err = c.DeleteExemption("generated-ulid")
+	err = c.DeleteExemption("segment-id", "generated-ulid")
 	require.NoError(t, err)
 }
 

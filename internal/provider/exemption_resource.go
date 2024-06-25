@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
@@ -53,6 +55,13 @@ func (e *exemptionResource) Metadata(_ context.Context, req resource.MetadataReq
 func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"segment": schema.StringAttribute{
+				Optional:    true,
+				Description: "The id of the segment to create an exemption for.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "A UILD that uniquely identifies the exemption.",
@@ -100,13 +109,14 @@ func (e *exemptionResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	ex, err := e.client.CreateExemption(plan.ToAPIReq())
+	ex, err := e.client.CreateExemption(plan.Segment.ValueString(), plan.ToAPIReq())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create exemption", err.Error())
 		return
 	}
 
 	state := ex.ToTF()
+	state.Segment = plan.Segment
 	state.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -119,13 +129,14 @@ func (e *exemptionResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	ex, err := e.client.ReadExemption(state.ID.ValueString())
+	ex, err := e.client.ReadExemption(state.Segment.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read exemption", err.Error())
 		return
 	}
 
 	tf := ex.ToTF()
+	tf.Segment = state.Segment
 	resp.Diagnostics.Append(resp.State.Set(ctx, &tf)...)
 }
 
@@ -147,19 +158,20 @@ func (e *exemptionResource) Update(ctx context.Context, req resource.UpdateReque
 	ex := plan.ToAPIReq()
 	ex.ID = state.ID.ValueString()
 
-	err := e.client.UpdateExemption(ex)
+	err := e.client.UpdateExemption(state.Segment.ValueString(), ex)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to update exemption", err.Error())
 		return
 	}
 
-	ex, err = e.client.ReadExemption(state.ID.ValueString())
+	ex, err = e.client.ReadExemption(state.Segment.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to read exemption after updating", err.Error())
 		return
 	}
 
 	state = ex.ToTF()
+	state.Segment = plan.Segment
 	state.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -171,7 +183,7 @@ func (e *exemptionResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	err := e.client.DeleteExemption(state.ID.ValueString())
+	err := e.client.DeleteExemption(state.Segment.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete exemption", err.Error())
 	}
