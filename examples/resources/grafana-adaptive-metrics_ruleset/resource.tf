@@ -21,7 +21,6 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 
 # Apply the latest recommendations on each apply
 data "grafana-adaptive-metrics_recommendations" "default" {
-  verbose = true
 }
 
 resource "grafana-adaptive-metrics_ruleset" "default" {
