@@ -54,6 +54,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: acceptance-tests
     strategy:
       max-parallel: 1
       matrix:
