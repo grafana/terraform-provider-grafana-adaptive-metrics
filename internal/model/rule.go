@@ -127,7 +127,7 @@ func (r RuleSetTF) ToAPIReq() []AggregationRule {
 }
 
 // RuleSetRule is a subset of RuleTF that is used in the RuleSetTF struct
-// This is necessary because the tfsdk doesn't support embedding structs
+// This is necessary because the tfsdk doesn't support embedding structs.
 type RuleSetRuleTF struct {
 	Metric    types.String `tfsdk:"metric"`
 	MatchType types.String `tfsdk:"match_type"`
