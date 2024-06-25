@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
@@ -12,80 +11,78 @@ type AggregationRules struct {
 	client *client.Client
 	mu     sync.RWMutex
 
-	etag  string
-	rules map[string]model.AggregationRule
+	segmentEtags map[string]string
 }
 
 func NewAggregationRules(c *client.Client) *AggregationRules {
-	return &AggregationRules{client: c, mu: sync.RWMutex{}, rules: make(map[string]model.AggregationRule)}
+	return &AggregationRules{client: c, mu: sync.RWMutex{}}
 }
 
 func (r *AggregationRules) Init() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	rules, etag, err := r.client.AggregationRules()
+	ruleSets, err := r.client.SegmentedAggregationRules()
 	if err != nil {
 		return err
 	}
 
-	for _, rule := range rules {
-		r.rules[rule.Metric] = rule
+	r.segmentEtags = make(map[string]string, len(ruleSets))
+	for _, ruleSet := range ruleSets {
+		r.segmentEtags[ruleSet.Segment.ID] = ruleSet.Etag
 	}
-	r.etag = etag
+
 	return nil
 }
 
-func (r *AggregationRules) Create(rule model.AggregationRule) error {
+func (r *AggregationRules) Create(segmentID string, rule model.AggregationRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	etag, err := r.client.CreateAggregationRule(rule, r.etag)
+	etag, err := r.client.CreateAggregationRule(segmentID, rule, r.segmentEtags[segmentID])
 	if err != nil {
 		return err
 	}
 
-	r.etag = etag
-	r.rules[rule.Metric] = rule
+	r.segmentEtags[segmentID] = etag
 	return nil
 }
 
-func (r *AggregationRules) Read(metric string) (model.AggregationRule, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (r *AggregationRules) Read(segmentID string, metric string) (model.AggregationRule, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-	rule, ok := r.rules[metric]
-	if !ok {
-		return model.AggregationRule{}, fmt.Errorf("no rule for %s found", metric)
+	rule, etag, err := r.client.ReadAggregationRule(segmentID, metric)
+	if err != nil {
+		return model.AggregationRule{}, err
 	}
 
+	r.segmentEtags[segmentID] = etag
 	return rule, nil
 }
 
-func (r *AggregationRules) Update(rule model.AggregationRule) error {
+func (r *AggregationRules) Update(segmentID string, rule model.AggregationRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	etag, err := r.client.UpdateAggregationRule(rule, r.etag)
+	etag, err := r.client.UpdateAggregationRule(segmentID, rule, r.segmentEtags[segmentID])
 	if err != nil {
 		return err
 	}
 
-	r.etag = etag
-	r.rules[rule.Metric] = rule
+	r.segmentEtags[segmentID] = etag
 	return nil
 }
 
-func (r *AggregationRules) Delete(rule model.AggregationRule) error {
+func (r *AggregationRules) Delete(segmentID string, rule model.AggregationRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	etag, err := r.client.DeleteAggregationRule(rule.Metric, r.etag)
+	etag, err := r.client.DeleteAggregationRule(segmentID, rule.Metric, r.segmentEtags[segmentID])
 	if err != nil {
 		return err
 	}
 
-	r.etag = etag
-	delete(r.rules, rule.Metric)
+	r.segmentEtags[segmentID] = etag
 	return nil
 }

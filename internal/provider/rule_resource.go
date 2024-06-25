@@ -52,6 +52,10 @@ func (r *ruleResource) Metadata(_ context.Context, req resource.MetadataRequest,
 func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"segment": schema.StringAttribute{
+				Optional:    true,
+				Description: "The name of the segment to aggregate metrics for.",
+			},
 			"metric": schema.StringAttribute{
 				Required:    true,
 				Description: "The name of the metric to be aggregated.",
@@ -123,17 +127,17 @@ func (r *ruleResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	if plan.AutoImport.ValueBool() {
-		_, err := r.rules.Read(plan.Metric.ValueString())
+		_, err := r.rules.Read(plan.Segment.ValueString(), plan.Metric.ValueString())
 		if err != nil {
 			// There is no existing rule for this metric; create it.
-			err := r.rules.Create(plan.ToAPIReq())
+			err := r.rules.Create(plan.Segment.ValueString(), plan.ToAPIReq())
 			if err != nil {
 				resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
 				return
 			}
 		} else {
 			// There is an existing rule for this metric; update it.
-			err := r.rules.Update(plan.ToAPIReq())
+			err := r.rules.Update(plan.Segment.ValueString(), plan.ToAPIReq())
 			if err != nil {
 				resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
 				return
@@ -142,7 +146,7 @@ func (r *ruleResource) Create(ctx context.Context, req resource.CreateRequest, r
 			resp.Diagnostics.AddWarning("Existing aggregation rule for metric found", "The existing rule has been updated and imported into Terraform state; no aggregation rule has been created.")
 		}
 	} else {
-		err := r.rules.Create(plan.ToAPIReq())
+		err := r.rules.Create(plan.Segment.ValueString(), plan.ToAPIReq())
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to create aggregation rule", err.Error())
 			return
@@ -160,7 +164,7 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	rule, err := r.rules.Read(state.Metric.ValueString())
+	rule, err := r.rules.Read(state.Segment.ValueString(), state.Metric.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddWarning("Unable to read aggregation rule", err.Error())
 		resp.State.RemoveResource(ctx)
@@ -168,6 +172,10 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	tf := rule.ToTF()
+
+	// Segment tells us where to put the rule later, but isn't actually a part
+	// of the rule, so we set it separately.
+	tf.Segment = state.Segment
 
 	// AutoImport is a meta field used by this Terraform provider; the API never returns
 	// a value for it so we keep it updated separately.
@@ -189,20 +197,20 @@ func (r *ruleResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	if plan.Metric.ValueString() != state.Metric.ValueString() {
-		err := r.rules.Delete(state.ToAPIReq())
+	if plan.TFIdentifier() != state.TFIdentifier() {
+		err := r.rules.Delete(state.Segment.ValueString(), state.ToAPIReq())
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
 			return
 		}
 
-		err = r.rules.Create(plan.ToAPIReq())
+		err = r.rules.Create(plan.Segment.ValueString(), plan.ToAPIReq())
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to replace aggregation rule", err.Error())
 			return
 		}
 	} else {
-		err := r.rules.Update(plan.ToAPIReq())
+		err := r.rules.Update(plan.Segment.ValueString(), plan.ToAPIReq())
 		if err != nil {
 			resp.Diagnostics.AddError("Unable to update aggregation rule", err.Error())
 			return
@@ -220,7 +228,7 @@ func (r *ruleResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	err := r.rules.Delete(state.ToAPIReq())
+	err := r.rules.Delete(state.Segment.ValueString(), state.ToAPIReq())
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete aggregation rule", err.Error())
 	}

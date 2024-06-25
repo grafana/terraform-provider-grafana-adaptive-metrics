@@ -1,10 +1,18 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const managedByTF = "terraform"
+
+type SegmentedRuleSet struct {
+	Etag    string            `json:"etag"`
+	Segment Segment           `json:"segment"`
+	Rules   []AggregationRule `json:"rules"`
+}
 
 type AggregationRule struct {
 	Metric    string `json:"metric"`
@@ -41,6 +49,7 @@ func (r AggregationRule) ToTF() RuleTF {
 }
 
 type RuleTF struct {
+	Segment   types.String `tfsdk:"segment"`
 	Metric    types.String `tfsdk:"metric"`
 	MatchType types.String `tfsdk:"match_type"`
 
@@ -56,6 +65,14 @@ type RuleTF struct {
 	AutoImport types.Bool `tfsdk:"auto_import"`
 
 	LastUpdated types.String `tfsdk:"-"`
+}
+
+func (r RuleTF) TFIdentifier() string {
+	if r.Segment.IsNull() {
+		return r.Metric.ValueString()
+	}
+
+	return fmt.Sprintf("%s/%s", r.Segment.ValueString(), r.Metric.ValueString())
 }
 
 func (r RuleTF) ToAPIReq() AggregationRule {
