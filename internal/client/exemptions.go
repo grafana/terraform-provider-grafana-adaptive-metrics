@@ -69,7 +69,3 @@ func (c *Client) DeleteExemption(segmentID string, exID string) error {
 type exemptionResp struct {
 	Result model.Exemption `json:"result"`
 }
-
-type exemptionsResp struct {
-	Result []model.Exemption `json:"result"`
-}
