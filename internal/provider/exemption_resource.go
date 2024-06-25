@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -74,13 +77,13 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultEmptyList{},
+				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 				Description: "The array of labels to keep; labels not in this array will be aggregated.",
 			},
 			"disable_recommendations": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultBoolFalse{},
+				Default:     booldefault.StaticBool(false),
 				Description: "When set to true, the recommendations service will exempt this metric from consideration.",
 			},
 			"reason": schema.StringAttribute{

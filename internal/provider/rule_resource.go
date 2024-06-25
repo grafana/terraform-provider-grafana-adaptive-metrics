@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -78,21 +81,21 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"drop": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultBoolFalse{},
+				Default:     booldefault.StaticBool(false),
 				Description: "Set to true to skip both ingestion and aggregation and drop the metric entirely.",
 			},
 			"keep_labels": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultEmptyList{},
+				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 				Description: "The array of labels to keep; labels not in this array will be aggregated.",
 			},
 			"drop_labels": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultEmptyList{},
+				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 				Description: "The array of labels that will be aggregated.",
 			},
 
@@ -100,7 +103,7 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultEmptyList{},
+				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 				Description: "The array of aggregation types to calculate for this metric.",
 			},
 
@@ -120,7 +123,7 @@ func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"auto_import": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultBoolFalse{},
+				Default:     booldefault.StaticBool(false),
 				Description: "When set to true, the rule will be automatically imported if it is not already in Terraform state.",
 			},
 		},

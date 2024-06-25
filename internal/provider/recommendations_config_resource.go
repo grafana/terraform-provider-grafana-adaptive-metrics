@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
@@ -54,7 +56,7 @@ func (r *recommendationsConfigResource) Schema(_ context.Context, _ resource.Sch
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultEmptyList{},
+				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 				Description: "The array of labels to keep; labels not in this array will be aggregated.",
 			},
 		},
