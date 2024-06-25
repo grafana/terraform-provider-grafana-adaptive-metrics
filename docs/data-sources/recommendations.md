@@ -27,7 +27,7 @@ output "recs" {
 ### Optional
 
 - `action` (List of String) Limit the types of recommended actions to list. Valid recommended actions are 'add', 'remove', 'keep', and 'update'. Defaults to listing all actions.
-- `segment` (String) The name of the segment to get recommendations for.
+- `segment` (String) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. The name of the segment to get recommendations for.
 - `verbose` (Boolean) If true, the response will include additional information about the recommendation, such as the number of rules, queries, and dashboards that use the metric.
 
 ### Read-Only
