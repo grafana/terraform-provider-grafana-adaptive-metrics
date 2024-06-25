@@ -46,6 +46,22 @@ func (r AggregationRule) ToTF() RuleTF {
 	}
 }
 
+func (r AggregationRule) ToRuleSetRuleTF() RuleSetRuleTF {
+	return RuleSetRuleTF{
+		Metric:    types.StringValue(r.Metric),
+		MatchType: types.StringValue(r.MatchType),
+
+		Drop:       types.BoolValue(r.Drop),
+		KeepLabels: toTypesStringSlice(r.KeepLabels),
+		DropLabels: toTypesStringSlice(r.DropLabels),
+
+		Aggregations: toTypesStringSlice(r.Aggregations),
+
+		AggregationInterval: types.StringValue(r.AggregationInterval),
+		AggregationDelay:    types.StringValue(r.AggregationDelay),
+	}
+}
+
 type RuleTF struct {
 	Segment   types.String `tfsdk:"segment"`
 	Metric    types.String `tfsdk:"metric"`
@@ -66,6 +82,67 @@ type RuleTF struct {
 }
 
 func (r RuleTF) ToAPIReq() AggregationRule {
+	return AggregationRule{
+		Metric:    r.Metric.ValueString(),
+		MatchType: r.MatchType.ValueString(),
+
+		Drop:       r.Drop.ValueBool(),
+		KeepLabels: toStringSlice(r.KeepLabels),
+		DropLabels: toStringSlice(r.DropLabels),
+
+		Aggregations: toStringSlice(r.Aggregations),
+
+		AggregationInterval: r.AggregationInterval.ValueString(),
+		AggregationDelay:    r.AggregationDelay.ValueString(),
+
+		ManagedBy: managedByTF,
+	}
+}
+
+type AggregationRuleSet []AggregationRule
+
+func (a AggregationRuleSet) ToTF(segment types.String) RuleSetTF {
+	output := make([]RuleSetRuleTF, len(a))
+	for i, rule := range a {
+		output[i] = rule.ToRuleSetRuleTF()
+	}
+
+	return RuleSetTF{
+		Segment: segment,
+		Rules:   output,
+	}
+}
+
+type RuleSetTF struct {
+	Segment types.String    `tfsdk:"segment"`
+	Rules   []RuleSetRuleTF `tfsdk:"rules"`
+}
+
+func (r RuleSetTF) ToAPIReq() []AggregationRule {
+	output := make([]AggregationRule, len(r.Rules))
+	for i, rule := range r.Rules {
+		output[i] = rule.ToAPIReq()
+	}
+	return output
+}
+
+// RuleSetRule is a subset of RuleTF that is used in the RuleSetTF struct
+// This is necessary because the tfsdk doesn't support embedding structs
+type RuleSetRuleTF struct {
+	Metric    types.String `tfsdk:"metric"`
+	MatchType types.String `tfsdk:"match_type"`
+
+	Drop       types.Bool     `tfsdk:"drop"`
+	KeepLabels []types.String `tfsdk:"keep_labels"`
+	DropLabels []types.String `tfsdk:"drop_labels"`
+
+	Aggregations []types.String `tfsdk:"aggregations"`
+
+	AggregationInterval types.String `tfsdk:"aggregation_interval"`
+	AggregationDelay    types.String `tfsdk:"aggregation_delay"`
+}
+
+func (r RuleSetRuleTF) ToAPIReq() AggregationRule {
 	return AggregationRule{
 		Metric:    r.Metric.ValueString(),
 		MatchType: r.MatchType.ValueString(),

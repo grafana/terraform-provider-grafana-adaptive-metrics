@@ -222,6 +222,84 @@ func TestAggregationRules(t *testing.T) {
 	require.Equal(t, rulesPayload, actualRules[0].Rules)
 }
 
+func TestReadAggregationRuleSet(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	const etag = "\"fake-etag\""
+	respHeader := make(http.Header)
+	respHeader.Set("ETag", etag)
+
+	s.addExpected("GET", "/aggregations/rules",
+		withRespHeader(respHeader),
+		withRespBody([]byte(`[{"metric":"test_metric","drop":true}]`)),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	actual, newEtag, err := c.ReadAggregationRuleSet("segment-id")
+	require.NoError(t, err)
+
+	require.Equal(t, etag, newEtag)
+	require.Equal(t, []model.AggregationRule{{Metric: "test_metric", Drop: true}}, actual)
+}
+
+func TestUpdateAggregationRuleSet(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	const etag = "\"fake-etag\""
+	expectedHeader := make(http.Header)
+	expectedHeader.Set("If-Match", etag)
+
+	respHeader := make(http.Header)
+	respHeader.Set("ETag", "\"updated-fake-etag\"")
+
+	s.addExpected("POST", "/aggregations/rules",
+		withReqHeader(expectedHeader),
+		withReqBody([]byte(`[{"metric":"test_metric","drop":true}]`)),
+		withRespHeader(respHeader),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	newEtag, err := c.UpdateAggregationRuleSet("segment-id", []model.AggregationRule{{Metric: "test_metric", Drop: true}}, etag)
+	require.NoError(t, err)
+
+	require.Equal(t, "\"updated-fake-etag\"", newEtag)
+}
+
+func TestUpdateAggregationRuleSetWithNilRules(t *testing.T) {
+	s := newMockServer(t)
+	defer s.close()
+
+	const etag = "\"fake-etag\""
+	expectedHeader := make(http.Header)
+	expectedHeader.Set("If-Match", etag)
+
+	respHeader := make(http.Header)
+	respHeader.Set("ETag", "\"updated-fake-etag\"")
+
+	s.addExpected("POST", "/aggregations/rules",
+		withReqHeader(expectedHeader),
+		withReqBody([]byte(`[]`)),
+		withRespHeader(respHeader),
+		withParams(url.Values{"segment": []string{"segment-id"}}),
+	)
+
+	c, err := New(s.server.URL, &Config{})
+	require.NoError(t, err)
+
+	newEtag, err := c.UpdateAggregationRuleSet("segment-id", nil, etag)
+	require.NoError(t, err)
+
+	require.Equal(t, "\"updated-fake-etag\"", newEtag)
+}
+
 func TestCreateAggregationRule(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
@@ -427,7 +505,7 @@ func TestCreateSegment(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	reqBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
+	reqBody := []byte(`{"id":"","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
 	respBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"id":"generated-ulid"}`)
 
 	s.addExpected("POST", "/aggregations/rules/segments",

@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -25,6 +26,7 @@ const privatePreviewWarning = "WARNING: contact Grafana Cloud support before use
 
 // Ensure AdaptiveMetricsProvider satisfies various provider interfaces.
 var _ provider.Provider = &AdaptiveMetricsProvider{}
+var _ provider.ProviderWithFunctions = &AdaptiveMetricsProvider{}
 
 // AdaptiveMetricsProvider defines the provider implementation.
 type AdaptiveMetricsProvider struct {
@@ -193,6 +195,7 @@ func (p *AdaptiveMetricsProvider) Configure(ctx context.Context, req provider.Co
 
 func (p *AdaptiveMetricsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		newRuleSetResource,
 		newRuleResource,
 		newExemptionResource,
 		newRecommendationsConfigResource,
@@ -203,6 +206,13 @@ func (p *AdaptiveMetricsProvider) Resources(_ context.Context) []func() resource
 func (p *AdaptiveMetricsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newRecommendationDatasource,
+	}
+}
+
+// Functions implements provider.ProviderWithFunctions.
+func (p *AdaptiveMetricsProvider) Functions(context.Context) []func() function.Function {
+	return []func() function.Function{
+		NewStableSortRulesFunction,
 	}
 }
 
