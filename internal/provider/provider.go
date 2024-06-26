@@ -36,7 +36,7 @@ type AdaptiveMetricsProvider struct {
 	version string
 
 	// commit is set to the provider commit on release, "unknown" when the
-	// provider is built and ran locally, and "unknown" when running acceptance
+	// provider is built and ran locally or when running acceptance
 	// testing.
 	commit string
 }
