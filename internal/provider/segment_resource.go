@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
@@ -65,7 +66,7 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"fallback_to_default": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     defaultBoolTrue{},
+				Default:     booldefault.StaticBool(true),
 				Description: privatePreviewWarning + "Whether to fallback to the default segment if the selector does not match any segments.",
 			},
 		},
