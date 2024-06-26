@@ -34,6 +34,11 @@ type AdaptiveMetricsProvider struct {
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
+
+	// commit is set to the provider commit on release, "unknown" when the
+	// provider is built and ran locally or when running acceptance
+	// testing.
+	commit string
 }
 
 // AdaptiveMetricsProviderModel describes the provider data model.
@@ -43,8 +48,6 @@ type AdaptiveMetricsProviderModel struct {
 	HTTPHeaders types.Map    `tfsdk:"http_headers"`
 	Retries     types.Int64  `tfsdk:"retries"`
 	Debug       types.Bool   `tfsdk:"debug"`
-
-	UserAgent types.String `json:"-" tfsdk:"-"`
 }
 
 func getStringOverriddenByEnvOrDefault(s types.String, envKey string, valDefault string) string {
@@ -174,6 +177,7 @@ func (p *AdaptiveMetricsProvider) Configure(ctx context.Context, req provider.Co
 		HTTPHeaders: httpHeaders,
 		Debug:       debug,
 		HttpClient:  httpClient,
+		UserAgent:   fmt.Sprintf("Terraform/%s grafana-adaptive-metrics-provider/%s (commit:%s)", req.TerraformVersion, p.version, p.commit),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Could not instantiate the API client.", err.Error())
@@ -216,10 +220,11 @@ func (p *AdaptiveMetricsProvider) Functions(context.Context) []func() function.F
 	}
 }
 
-func New(version string) func() provider.Provider {
+func New(version string, commit string) func() provider.Provider {
 	return func() provider.Provider {
 		return &AdaptiveMetricsProvider{
 			version: version,
+			commit:  commit,
 		}
 	}
 }

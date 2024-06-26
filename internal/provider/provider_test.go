@@ -12,6 +12,6 @@ const (
 
 var (
 	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-		"grafana-adaptive-metrics": providerserver.NewProtocol6WithError(New("test")()),
+		"grafana-adaptive-metrics": providerserver.NewProtocol6WithError(New("test", "unknown")()),
 	}
 )
