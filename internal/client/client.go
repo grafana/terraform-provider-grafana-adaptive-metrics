@@ -33,6 +33,8 @@ type Config struct {
 	HTTPHeaders map[string]string
 	Debug       bool
 	HttpClient  *http.Client
+
+	UserAgent string
 }
 
 // New creates a new Grafana client.
@@ -126,6 +128,8 @@ func (c *Client) newRequest(method, requestPath string, query url.Values, header
 			req.Header.Add(k, v)
 		}
 	}
+
+	req.Header.Add("User-Agent", c.Cfg.UserAgent)
 
 	if c.Cfg.Debug {
 		if body == nil {
