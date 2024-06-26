@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -55,79 +52,24 @@ func (r *ruleResource) Metadata(_ context.Context, req resource.MetadataRequest,
 }
 
 func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"segment": schema.StringAttribute{
-				Optional:    true,
-				Description: privatePreviewWarning + "The name of the segment to aggregate metrics for.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"metric": schema.StringAttribute{
-				Required:    true,
-				Description: "The name of the metric to be aggregated.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"match_type": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(""),
-				Description: "Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.",
-			},
-
-			"drop": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(false),
-				Description: "Set to true to skip both ingestion and aggregation and drop the metric entirely.",
-			},
-			"keep_labels": schema.ListAttribute{
-				ElementType: types.StringType,
-				Optional:    true,
-				Computed:    true,
-				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
-				Description: "The array of labels to keep; labels not in this array will be aggregated.",
-			},
-			"drop_labels": schema.ListAttribute{
-				ElementType: types.StringType,
-				Optional:    true,
-				Computed:    true,
-				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
-				Description: "The array of labels that will be aggregated.",
-			},
-
-			"aggregations": schema.ListAttribute{
-				ElementType: types.StringType,
-				Optional:    true,
-				Computed:    true,
-				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
-				Description: "The array of aggregation types to calculate for this metric.",
-			},
-
-			"aggregation_interval": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(""),
-				Description: "The interval at which to generate the aggregated series.",
-			},
-			"aggregation_delay": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(""),
-				Description: "The delay until aggregation is performed.",
-			},
-
-			"auto_import": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(false),
-				Description: "When set to true, the rule will be automatically imported if it is not already in Terraform state.",
-			},
+	ruleSchemaCopy := schema.Schema{
+		Attributes: ruleAttributes(true),
+	}
+	// These fields are not part of the shared schema, but are used by the provider to manage the resource.
+	ruleSchemaCopy.Attributes["auto_import"] = schema.BoolAttribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     booldefault.StaticBool(false),
+		Description: "When set to true, the rule will be automatically imported if it is not already in Terraform state.",
+	}
+	ruleSchemaCopy.Attributes["segment"] = schema.StringAttribute{
+		Optional:    true,
+		Description: privatePreviewWarning + "The name of the segment to aggregate metrics for.",
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.RequiresReplace(),
 		},
 	}
+	resp.Schema = ruleSchemaCopy
 }
 
 func (r *ruleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

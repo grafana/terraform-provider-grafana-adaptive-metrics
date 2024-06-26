@@ -86,3 +86,29 @@ func (r *AggregationRules) Delete(segmentID string, rule model.AggregationRule) 
 	r.segmentEtags[segmentID] = etag
 	return nil
 }
+
+func (r *AggregationRules) ReadRuleSet(segmentID string) (model.AggregationRuleSet, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	rules, etag, err := r.client.ReadAggregationRuleSet(segmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	r.segmentEtags[segmentID] = etag
+	return rules, nil
+}
+
+func (r *AggregationRules) UpdateRuleSet(segmentID string, rules model.AggregationRuleSet) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	etag, err := r.client.UpdateAggregationRuleSet(segmentID, rules, r.segmentEtags[segmentID])
+	if err != nil {
+		return err
+	}
+
+	r.segmentEtags[segmentID] = etag
+	return nil
+}
