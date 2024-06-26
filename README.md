@@ -70,3 +70,27 @@ Acceptance tests expect the `GRAFANA_AM_API_URL` and `GRAFANA_AM_API_KEY` enviro
 ### Updating documentation
 
 To generate or update documentation, run `go generate`.
+
+**Note**: the installed version of terraform must match your system architecture. If you attempt running the docs generator on an Apple Silicon machine while the amd64 terraform binary is installed, you will receive this error:
+
+```
+Error executing command: unable to generate website: error exporting provider schema from Terraform: unable to run terraform init on provider: exit status 1
+
+Error: Incompatible provider version
+
+Provider registry.terraform.io/hashicorp/adaptive-metrics v0.0.1 does not
+have a package available for your current platform, darwin_amd64.
+```
+
+### Releasing the provider
+
+The terraform registry automatically indexes all GitHub releases in this repo. To publish a new release:
+
+First, choose the appropriate version according to semver, then:
+
+```
+git tag <version>
+git push origin <version>
+```
+
+At this point a github action will create and sign the release, then the registry will index it.
