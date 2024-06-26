@@ -427,7 +427,7 @@ func TestCreateSegment(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	reqBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
+	reqBody := []byte(`{"id":"","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
 	respBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"id":"generated-ulid"}`)
 
 	s.addExpected("POST", "/aggregations/rules/segments",
