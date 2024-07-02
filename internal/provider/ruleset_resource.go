@@ -97,6 +97,9 @@ func (r *ruleSetResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	// Prevent unnecessary drift due to reordering
+	rules = model.AlignUpstreamWithState(state.ToAPIReq(), rules)
+
 	tf := rules.ToTF(state.Segment)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &tf)...)
