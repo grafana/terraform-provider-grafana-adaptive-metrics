@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/url"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
@@ -59,7 +58,9 @@ func (c *Client) ReadSegment(id string) (model.Segment, error) {
 		}
 	}
 
-	return model.Segment{}, fmt.Errorf("segment not found")
+	return model.Segment{}, ErrNotFound{
+		BodyContents: []byte("segment not found"),
+	}
 }
 
 func (c *Client) UpdateSegment(s model.Segment) error {

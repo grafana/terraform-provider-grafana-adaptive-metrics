@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -157,6 +158,11 @@ func (c *Client) newRequest(method, requestPath string, query url.Values, header
 
 	req.Header.Add("Content-Type", "application/json")
 	return req, err
+}
+
+func IsErrNotFound(err error) bool {
+	var e ErrNotFound
+	return errors.As(err, &e)
 }
 
 type ErrNotFound struct {

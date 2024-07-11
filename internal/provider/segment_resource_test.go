@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,6 +22,7 @@ func TestAccSegmentResource(t *testing.T) {
 		}
 	})
 
+	var segmentID string
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -46,6 +48,29 @@ resource "grafana-adaptive-metrics_segment" "test" {
 			},
 			// Update + Read.
 			{
+				Config: providerConfig + `
+resource "grafana-adaptive-metrics_segment" "test" {
+	name = "test segment 2"
+	selector = "{namespace=\"test\"}"
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment 2"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "true"),
+					func(s *terraform.State) error {
+						// Capture the exemption ID for later use.
+						segmentID = s.RootModule().Resources["grafana-adaptive-metrics_segment.test"].Primary.ID
+						return nil
+					},
+				),
+			},
+			// External delete of resource, TF should recreate it.
+			{
+				PreConfig: func() {
+					client := ClientForAccTest(t)
+					require.NoError(t, client.DeleteSegment(segmentID))
+				},
 				Config: providerConfig + `
 resource "grafana-adaptive-metrics_segment" "test" {
 	name = "test segment 2"

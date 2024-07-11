@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
+	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
 
@@ -92,8 +93,12 @@ func (r *ruleSetResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	rules, err := r.rules.ReadRuleSet(state.Segment.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddWarning("Unable to read aggregation rule", err.Error())
-		resp.State.RemoveResource(ctx)
+		if client.IsErrNotFound(err) {
+			resp.Diagnostics.AddWarning("Ruleset not found", err.Error())
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		resp.Diagnostics.AddError("Unable to read ruleset", err.Error())
 		return
 	}
 
