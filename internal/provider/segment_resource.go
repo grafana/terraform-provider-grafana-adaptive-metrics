@@ -106,6 +106,11 @@ func (e *segmentResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	segment, err := e.client.ReadSegment(state.ID.ValueString())
 	if err != nil {
+		if client.IsErrNotFound(err) {
+			resp.Diagnostics.AddWarning("Segment not found", err.Error())
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Unable to read segment", err.Error())
 		return
 	}

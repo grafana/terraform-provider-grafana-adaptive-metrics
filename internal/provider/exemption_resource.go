@@ -134,6 +134,11 @@ func (e *exemptionResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	ex, err := e.client.ReadExemption(state.Segment.ValueString(), state.ID.ValueString())
 	if err != nil {
+		if client.IsErrNotFound(err) {
+			resp.Diagnostics.AddWarning("Exemption not found", err.Error())
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Unable to read exemption", err.Error())
 		return
 	}
