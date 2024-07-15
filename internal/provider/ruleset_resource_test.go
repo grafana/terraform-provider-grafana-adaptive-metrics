@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 )
 
@@ -68,11 +69,28 @@ resource "grafana-adaptive-metrics_ruleset" "test" {
 			},
 			// ImportState.
 			{
-				ResourceName:                         "grafana-adaptive-metrics_ruleset.test",
-				ImportState:                          true,
-				ImportStateVerify:                    true,
-				ImportStateId:                        "default",
-				ImportStateVerifyIdentifierAttribute: "segment",
+				ResourceName: "grafana-adaptive-metrics_ruleset.test",
+				ImportState:  true,
+				// We can't use ImportStateVerify because ruleset is a singleton, and has no id.
+				ImportStateCheck: func(is []*terraform.InstanceState) error {
+					if len(is) != 1 {
+						return fmt.Errorf("expected 1 state, got %d", len(is))
+					}
+
+					ruleset := is[0].Attributes
+					if ruleset["rules.#"] != "1" {
+						return fmt.Errorf("expected 1 rule, got %s", ruleset["rules.#"])
+					}
+					if ruleset["rules.0.metric"] != metricName {
+						return fmt.Errorf("expected metric %s, got %s", metricName, ruleset["rules.0.metric"])
+					}
+					if ruleset["rules.0.drop"] != "true" {
+						return fmt.Errorf("expected drop true, got %s", ruleset["rules.0.drop"])
+					}
+
+					return nil
+				},
+				ImportStateId: "default",
 			},
 			// Update + Read.
 			{
