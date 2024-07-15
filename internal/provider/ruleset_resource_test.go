@@ -66,6 +66,14 @@ resource "grafana-adaptive-metrics_ruleset" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_ruleset.test", "rules.0.aggregation_delay", ""),
 				),
 			},
+			// ImportState.
+			{
+				ResourceName:                         "grafana-adaptive-metrics_ruleset.test",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateId:                        "default",
+				ImportStateVerifyIdentifierAttribute: "segment",
+			},
 			// Update + Read.
 			{
 				Config: providerConfig + fmt.Sprintf(`

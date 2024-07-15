@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
@@ -18,8 +20,9 @@ type ruleSetResource struct {
 }
 
 var (
-	_ resource.Resource              = &ruleSetResource{}
-	_ resource.ResourceWithConfigure = &ruleSetResource{}
+	_ resource.Resource                = &ruleSetResource{}
+	_ resource.ResourceWithConfigure   = &ruleSetResource{}
+	_ resource.ResourceWithImportState = &ruleSetResource{}
 )
 
 func newRuleSetResource() resource.Resource {
@@ -142,5 +145,15 @@ func (r *ruleSetResource) Delete(ctx context.Context, req resource.DeleteRequest
 	err := r.rules.UpdateRuleSet(state.Segment.ValueString(), nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to delete aggregation rule", err.Error())
+	}
+}
+
+// ImportState implements resource.ResourceWithImportState.
+func (r *ruleSetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// The default segment is a special case where we don't have an ID to import.
+	if req.ID == "default" {
+		resp.State.SetAttribute(ctx, path.Root("segment"), types.StringNull())
+	} else {
+		resource.ImportStatePassthroughID(ctx, path.Root("segment"), req, resp)
 	}
 }
