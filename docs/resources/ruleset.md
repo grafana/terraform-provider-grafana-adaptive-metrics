@@ -38,8 +38,7 @@ data "grafana-adaptive-metrics_recommendations" "default" {
 }
 
 resource "grafana-adaptive-metrics_ruleset" "default" {
-  # stable_sort_rules ensures that the rules are always applied in the same order, regardless of the ordering of the recommendations
-  rules = provider::grafana-adaptive-metrics::stable_sort_rules(data.grafana-adaptive-metrics_recommendations.default.recommendations)
+  rules = data.grafana-adaptive-metrics_recommendations.default.recommendations
 }
 ```
 
@@ -70,3 +69,15 @@ Optional:
 - `drop_labels` (List of String) The array of labels that will be aggregated.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 - `match_type` (String) Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+# Import the ruleset from the default segment
+terraform import grafana-adaptive-metrics_ruleset.rules default
+
+# Import the ruleset from a custom segment
+terraform import grafana-adaptive-metrics_ruleset.rules $CUSTOM_SEGMENT_ID
+```
