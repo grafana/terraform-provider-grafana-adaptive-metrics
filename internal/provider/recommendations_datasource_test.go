@@ -20,6 +20,22 @@ func TestAccRecommendationDatasource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
+			// This test requires a rule and exemption are present in order to guarantee some recommendations are returned.
+			{
+				Config: providerConfig + `
+resource "grafana-adaptive-metrics_exemption" "test" {
+	metric = "am_terraform_provider_acceptance_test_metric"
+	disable_recommendations = true
+}
+
+resource "grafana-adaptive-metrics_rule" "test" {
+	metric = "am_terraform_provider_acceptance_test_metric"
+	drop_labels = ["this", "metric", "doesnt", "exist"]
+	aggregations = ["count"]
+}
+`,
+				Destroy: false,
+			},
 			// Read non-verbose.
 			{
 				Config: providerConfig + `
