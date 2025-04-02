@@ -26,7 +26,7 @@ func TestAccRecommendationDatasource(t *testing.T) {
 				Config: providerConfig + `
 resource "grafana-adaptive-metrics_segment" "test" {
 	name = "test"
-	selector = "{namespace=\"recommendations_test\"}"
+	selector = "{label=\"test\"}"
 }
 
 resource "grafana-adaptive-metrics_exemption" "test" {
@@ -42,7 +42,6 @@ resource "grafana-adaptive-metrics_rule" "test" {
 	segment = grafana-adaptive-metrics_segment.test.id
 }
 `,
-				Destroy: false,
 			},
 			// Read non-verbose.
 			{
