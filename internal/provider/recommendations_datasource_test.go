@@ -30,10 +30,12 @@ resource "grafana-adaptive-metrics_exemption" "test" {
 	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 }
 
-resource "grafana-adaptive-metrics_rule" "test" {
-	metric = "am_terraform_provider_acceptance_test_metric"
-	drop_labels = ["this", "metric", "doesnt", "exist"]
-	aggregations = ["count"]
+resource "grafana-adaptive-metrics_ruleset" "test" {
+	rules = [{
+		metric = "am_terraform_provider_acceptance_test_metric"
+		drop_labels = ["this", "metric", "doesnt", "exist"]
+		aggregations = ["count"]
+	}]
 	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 }
 
