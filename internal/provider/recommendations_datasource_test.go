@@ -21,17 +21,25 @@ func TestAccRecommendationDatasource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// This test requires a rule and exemption are present in order to guarantee some recommendations are returned.
+			// We do this in a separate segment to avoid conflicts with the ruleSetResourceTest.
 			{
 				Config: providerConfig + `
+resource "grafana-adaptive-metrics_segment" "test" {
+	name = "test"
+	selector = "{label=\"test\"}"
+}
+
 resource "grafana-adaptive-metrics_exemption" "test" {
 	metric = "am_terraform_provider_acceptance_test_metric"
 	disable_recommendations = true
+	segment = grafana-adaptive-metrics_segment.test.id
 }
 
 resource "grafana-adaptive-metrics_rule" "test" {
 	metric = "am_terraform_provider_acceptance_test_metric"
 	drop_labels = ["this", "metric", "doesnt", "exist"]
 	aggregations = ["count"]
+	segment = grafana-adaptive-metrics_segment.test.id
 }
 `,
 				Destroy: false,
@@ -39,7 +47,9 @@ resource "grafana-adaptive-metrics_rule" "test" {
 			// Read non-verbose.
 			{
 				Config: providerConfig + `
-data "grafana-adaptive-metrics_recommendations" "test" {}
+data "grafana-adaptive-metrics_recommendations" "test" {
+	segment = grafana-adaptive-metrics_segment.test.id
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAttr("metric", "am_terraform_provider_acceptance_test_metric"),
@@ -68,6 +78,7 @@ data "grafana-adaptive-metrics_recommendations" "test" {}
 				Config: providerConfig + `
 data "grafana-adaptive-metrics_recommendations" "test" {
 	verbose = true
+	segment = grafana-adaptive-metrics_segment.test.id
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
