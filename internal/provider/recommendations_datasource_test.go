@@ -23,7 +23,9 @@ func TestAccRecommendationDatasource(t *testing.T) {
 			// Read non-verbose.
 			{
 				Config: providerConfig + `
-data "grafana-adaptive-metrics_recommendations" "test" {}
+data "grafana-adaptive-metrics_recommendations" "test" {
+  segment = "01JQVN6036Z18P6Z958JNNTXRP"
+}
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAttr("metric", "am_terraform_provider_acceptance_test_metric"),
@@ -51,6 +53,7 @@ data "grafana-adaptive-metrics_recommendations" "test" {}
 			{
 				Config: providerConfig + `
 data "grafana-adaptive-metrics_recommendations" "test" {
+	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 	verbose = true
 }
 `,

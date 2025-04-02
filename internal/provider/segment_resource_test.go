@@ -17,6 +17,10 @@ func TestAccSegmentResource(t *testing.T) {
 		require.NoError(t, err)
 
 		for _, s := range segments {
+			if s.ID == "01JQVN6036Z18P6Z958JNNTXRP" {
+				// Recommendations test segment, do not delete.
+				continue
+			}
 			err = c.DeleteSegment(s.ID)
 			require.NoError(t, err)
 		}
