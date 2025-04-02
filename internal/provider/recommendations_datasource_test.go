@@ -24,30 +24,25 @@ func TestAccRecommendationDatasource(t *testing.T) {
 			// We do this in a separate segment to avoid conflicts with the ruleSetResourceTest.
 			{
 				Config: providerConfig + `
-resource "grafana-adaptive-metrics_segment" "test" {
-	name = "test"
-	selector = "{namespace=\"recommendations_test\"}"
-}
-
 resource "grafana-adaptive-metrics_exemption" "test" {
 	metric = "am_terraform_provider_acceptance_test_metric"
 	disable_recommendations = true
-	segment = grafana-adaptive-metrics_segment.test.id
+	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 }
 
 resource "grafana-adaptive-metrics_rule" "test" {
 	metric = "am_terraform_provider_acceptance_test_metric"
 	drop_labels = ["this", "metric", "doesnt", "exist"]
 	aggregations = ["count"]
-	segment = grafana-adaptive-metrics_segment.test.id
+	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 }
 
 data "grafana-adaptive-metrics_recommendations" "non_verbose" {
-	segment = grafana-adaptive-metrics_segment.test.id
+	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 }
 
 data "grafana-adaptive-metrics_recommendations" "verbose" {
-	segment = grafana-adaptive-metrics_segment.test.id
+	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 	verbose = true
 }
 `,
