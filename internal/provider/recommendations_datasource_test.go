@@ -13,64 +13,68 @@ import (
 func TestAccRecommendationDatasource(t *testing.T) {
 	CheckAccTestsEnabled(t)
 
-	testAttr := func(resource, attr, value string) resource.TestCheckFunc {
-		return checkMetricRecommendationAttr("data.grafana-adaptive-metrics_recommendations."+resource, "am_terraform_provider_acceptance_test_metric", attr, value)
+	testAttr := func(attr, value string) resource.TestCheckFunc {
+		return checkMetricRecommendationAttr("data.grafana-adaptive-metrics_recommendations.test", "am_terraform_provider_acceptance_test_metric", attr, value)
 	}
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// This test requires a rule and exemption are present in order to guarantee some recommendations are returned.
-			// We do this in a separate segment to avoid conflicts with the ruleSetResourceTest.
+			// Read non-verbose.
 			{
 				Config: providerConfig + `
-data "grafana-adaptive-metrics_recommendations" "non_verbose" {
-	segment = "01JQVN6036Z18P6Z958JNNTXRP"
+data "grafana-adaptive-metrics_recommendations" "test" {
+  segment = "01JQVN6036Z18P6Z958JNNTXRP"
 }
-
-data "grafana-adaptive-metrics_recommendations" "verbose" {
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAttr("metric", "am_terraform_provider_acceptance_test_metric"),
+					testAttr("drop", "false"),
+					testAttr("keep_labels.#", "0"),
+					testAttr("drop_labels.#", "4"),
+					testAttr("drop_labels.0", "this"),
+					testAttr("drop_labels.1", "metric"),
+					testAttr("drop_labels.2", "doesnt"),
+					testAttr("drop_labels.3", "exist"),
+					testAttr("aggregations.#", "1"),
+					testAttr("aggregations.0", "count"),
+					testAttr("aggregation_interval", ""),
+					testAttr("aggregation_delay", ""),
+					testAttr("recommended_action", ""),
+					testAttr("usages_in_rules", "0"),
+					testAttr("usages_in_queries", "0"),
+					testAttr("usages_in_dashboards", "0"),
+					testAttr("kept_labels.#", "0"),
+					testAttr("total_series_before_aggregation", "0"),
+					testAttr("total_series_after_aggregation", "0"),
+				),
+			},
+			// Read verbose.
+			{
+				Config: providerConfig + `
+data "grafana-adaptive-metrics_recommendations" "test" {
 	segment = "01JQVN6036Z18P6Z958JNNTXRP"
 	verbose = true
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					testAttr("non_verbose", "metric", "am_terraform_provider_acceptance_test_metric"),
-					testAttr("non_verbose", "drop", "false"),
-					testAttr("non_verbose", "keep_labels.#", "0"),
-					testAttr("non_verbose", "drop_labels.#", "4"),
-					testAttr("non_verbose", "drop_labels.0", "this"),
-					testAttr("non_verbose", "drop_labels.1", "metric"),
-					testAttr("non_verbose", "drop_labels.2", "doesnt"),
-					testAttr("non_verbose", "drop_labels.3", "exist"),
-					testAttr("non_verbose", "aggregations.#", "1"),
-					testAttr("non_verbose", "aggregations.0", "count"),
-					testAttr("non_verbose", "aggregation_interval", ""),
-					testAttr("non_verbose", "aggregation_delay", ""),
-					testAttr("non_verbose", "recommended_action", ""),
-					testAttr("non_verbose", "usages_in_rules", "0"),
-					testAttr("non_verbose", "usages_in_queries", "0"),
-					testAttr("non_verbose", "usages_in_dashboards", "0"),
-					testAttr("non_verbose", "kept_labels.#", "0"),
-					testAttr("non_verbose", "total_series_before_aggregation", "0"),
-					testAttr("non_verbose", "total_series_after_aggregation", "0"),
-
-					testAttr("verbose", "metric", "am_terraform_provider_acceptance_test_metric"),
-					testAttr("verbose", "drop", "false"),
-					testAttr("verbose", "keep_labels.#", "0"),
-					testAttr("verbose", "drop_labels.#", "4"),
-					testAttr("verbose", "drop_labels.0", "this"),
-					testAttr("verbose", "drop_labels.1", "metric"),
-					testAttr("verbose", "drop_labels.2", "doesnt"),
-					testAttr("verbose", "drop_labels.3", "exist"),
-					testAttr("verbose", "aggregations.#", "1"),
-					testAttr("verbose", "aggregations.0", "count"),
-					testAttr("verbose", "recommended_action", "keep"),
-					testAttr("verbose", "usages_in_rules", "0"),
-					testAttr("verbose", "usages_in_queries", "0"),
-					testAttr("verbose", "usages_in_dashboards", "0"),
-					testAttr("verbose", "kept_labels.#", "0"),
-					testAttr("verbose", "total_series_before_aggregation", "0"),
-					testAttr("verbose", "total_series_after_aggregation", "0"),
+					testAttr("metric", "am_terraform_provider_acceptance_test_metric"),
+					testAttr("drop", "false"),
+					testAttr("keep_labels.#", "0"),
+					testAttr("drop_labels.#", "4"),
+					testAttr("drop_labels.0", "this"),
+					testAttr("drop_labels.1", "metric"),
+					testAttr("drop_labels.2", "doesnt"),
+					testAttr("drop_labels.3", "exist"),
+					testAttr("aggregations.#", "1"),
+					testAttr("aggregations.0", "count"),
+					testAttr("recommended_action", "keep"),
+					testAttr("usages_in_rules", "0"),
+					testAttr("usages_in_queries", "0"),
+					testAttr("usages_in_dashboards", "0"),
+					testAttr("kept_labels.#", "0"),
+					testAttr("total_series_before_aggregation", "0"),
+					testAttr("total_series_after_aggregation", "0"),
 				),
 			},
 		},
