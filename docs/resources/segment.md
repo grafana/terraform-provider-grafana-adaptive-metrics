@@ -25,13 +25,13 @@ resource "grafana-adaptive-metrics_segment" "s1" {
 
 ### Required
 
-- `name` (String) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. The name of the segment.
-- `selector` (String) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. The selector that defines the segment.
+- `name` (String) The name of the segment.
+- `selector` (String) The selector that defines the segment.
 
 ### Optional
 
-- `fallback_to_default` (Boolean) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Whether to fallback to the default segment if the selector does not match any segments.
+- `fallback_to_default` (Boolean) Whether to fallback to the default segment if the selector does not match any segments.
 
 ### Read-Only
 
-- `id` (String) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. A ULID that uniquely identifies the segment.
+- `id` (String) A ULID that uniquely identifies the segment.

@@ -43,4 +43,4 @@ resource "grafana-adaptive-metrics_rule" "prometheus_request_duration_seconds_su
 - `drop_labels` (List of String) The array of labels that will be aggregated.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 - `match_type` (String) Specifies how the metric field matches to incoming metric names. Can be 'prefix', 'suffix', or 'exact', defaults to 'exact'.
-- `segment` (String) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. The name of the segment to aggregate metrics for.
+- `segment` (String) The name of the segment to aggregate metrics for.

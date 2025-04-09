@@ -60,7 +60,7 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 		Attributes: map[string]schema.Attribute{
 			"segment": schema.StringAttribute{
 				Optional:    true,
-				Description: privatePreviewWarning + "The id of the segment to create an exemption for.",
+				Description: "The id of the segment to create an exemption for.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

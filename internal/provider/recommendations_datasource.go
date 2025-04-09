@@ -51,7 +51,7 @@ func (r *recommendationDatasource) Schema(_ context.Context, _ datasource.Schema
 		Attributes: map[string]schema.Attribute{
 			"segment": schema.StringAttribute{
 				Optional:    true,
-				Description: privatePreviewWarning + "The name of the segment to get recommendations for.",
+				Description: "The name of the segment to get recommendations for.",
 			},
 			"verbose": schema.BoolAttribute{
 				Optional:    true,
