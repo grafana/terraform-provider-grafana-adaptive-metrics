@@ -3,12 +3,12 @@
 page_title: "grafana-adaptive-metrics_segment Resource - terraform-provider-grafana-adaptive-metrics"
 subcategory: ""
 description: |-
-  WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration.
+  
 ---
 
 # grafana-adaptive-metrics_segment (Resource)
 
-WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration.
+
 
 ## Example Usage
 
