@@ -13,7 +13,6 @@ on:
 
 permissions:
   contents: read  # Testing only needs permissions to read the repository contents.
-  id-token: write # Needed to assume roles from Github's OIDC.
 
 jobs:
   # Ensure project builds before running testing matrix
@@ -23,6 +22,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
@@ -38,6 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
@@ -59,10 +62,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: "go.mod"
-          cache: true
+          cache: false
       - run: go mod download
       - run: go test -v -cover ./...
         timeout-minutes: 10
@@ -73,6 +78,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      id-token: write # Needed to assume roles from Github's OIDC.
     concurrency:
       group: acceptance-tests
     strategy:
@@ -87,6 +94,8 @@ jobs:
           - '1.4.*'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
@@ -95,7 +104,7 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
-      - uses: grafana/shared-workflows/actions/get-vault-secrets@main
+      - uses: grafana/shared-workflows/actions/get-vault-secrets@fa48192dac470ae356b3f7007229f3ac28c48a25 # Pinned to specific commit from 25-Apr-2025
         with:
           repo_secrets: |
             GRAFANA_AM_API_URL=cloud-tests:api-url

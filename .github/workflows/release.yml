@@ -12,21 +12,23 @@ on:
 # GitHub considers creating releases and uploading assets as writing contents.
 permissions:
   contents: write
-  id-token: write # Needed to assume roles from Github's OIDC.
 
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Needed to assume roles from Github's OIDC.
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
-          cache: true
-      - uses: grafana/shared-workflows/actions/get-vault-secrets@main
+          cache: false
+      - uses: grafana/shared-workflows/actions/get-vault-secrets@fa48192dac470ae356b3f7007229f3ac28c48a25 # Pinned to specific commit from 25-Apr-2025
         with:
           repo_secrets: |
             GPG_PRIVATE_KEY=release:private-key
