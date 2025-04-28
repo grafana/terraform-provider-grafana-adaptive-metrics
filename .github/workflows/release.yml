@@ -22,11 +22,12 @@ jobs:
         with:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
-          cache: true
-      - uses: grafana/shared-workflows/actions/get-vault-secrets@main
+          cache: false
+      - uses: grafana/shared-workflows/actions/get-vault-secrets@75804962c1ba608148988c1e2dc35fbb0ee21746 # main as of 28/04/2025
         with:
           repo_secrets: |
             GPG_PRIVATE_KEY=release:private-key
