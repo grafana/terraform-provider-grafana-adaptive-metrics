@@ -80,6 +80,7 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
 						Optional:    true,
+						Computed:    true,
 						Default:     booldefault.StaticBool(false),
 						Description: "Whether to automatically apply the generated recommendations in this segment.",
 					},
