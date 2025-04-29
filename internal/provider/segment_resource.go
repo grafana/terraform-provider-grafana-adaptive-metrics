@@ -51,28 +51,28 @@ func (e *segmentResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: privatePreviewWarning,
+		Description: "",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: privatePreviewWarning + "A ULID that uniquely identifies the segment.",
+				Description: "A ULID that uniquely identifies the segment.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
-				Description: privatePreviewWarning + "The name of the segment.",
+				Description: "The name of the segment.",
 			},
 			"selector": schema.StringAttribute{
 				Required:    true,
-				Description: privatePreviewWarning + "The selector that defines the segment.",
+				Description: "The selector that defines the segment.",
 			},
 			"fallback_to_default": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(true),
-				Description: privatePreviewWarning + "Whether to fallback to the default segment if the selector does not match any segments.",
+				Description: "Whether to fallback to the default segment if the selector does not match any segments.",
 			},
 		},
 	}
