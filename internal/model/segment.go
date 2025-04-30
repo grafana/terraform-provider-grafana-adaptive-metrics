@@ -21,14 +21,20 @@ type AutoApplyConfig struct {
 }
 
 func (e Segment) ToTF() SegmentTF {
-	autoApply, _ := types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(e.AutoApply.Enabled)})
-	return SegmentTF{
+	segment := SegmentTF{
 		ID:                types.StringValue(e.ID),
 		Name:              types.StringValue(e.Name),
 		Selector:          types.StringValue(e.Selector),
 		FallbackToDefault: types.BoolValue(e.FallbackToDefault),
-		AutoApply:         autoApply,
 	}
+
+	if e.AutoApply != nil {
+		segment.AutoApply, _ = types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(e.AutoApply.Enabled)})
+	} else {
+		segment.AutoApply = types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType})
+	}
+
+	return segment
 }
 
 type SegmentTF struct {
