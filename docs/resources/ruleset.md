@@ -51,7 +51,7 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 
 ### Optional
 
-- `segment` (String) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. The name of the segment to aggregate metrics for.
+- `segment` (String) The name of the segment to aggregate metrics for.
 
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`

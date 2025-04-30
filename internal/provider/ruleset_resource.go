@@ -55,7 +55,7 @@ func (r *ruleSetResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		Attributes: map[string]schema.Attribute{
 			"segment": schema.StringAttribute{
 				Optional:    true,
-				Description: privatePreviewWarning + "The name of the segment to aggregate metrics for.",
+				Description: "The name of the segment to aggregate metrics for.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
