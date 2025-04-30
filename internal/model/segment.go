@@ -1,7 +1,11 @@
 package model
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type Segment struct {
@@ -17,37 +21,36 @@ type AutoApplyConfig struct {
 }
 
 func (e Segment) ToTF() SegmentTF {
+	autoApply, _ := types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(e.AutoApply.Enabled)})
 	return SegmentTF{
 		ID:                types.StringValue(e.ID),
 		Name:              types.StringValue(e.Name),
 		Selector:          types.StringValue(e.Selector),
 		FallbackToDefault: types.BoolValue(e.FallbackToDefault),
-		AutoApply: AutoApplyConfigTF{
-			Enabled: e.AutoApply.Enabled,
-		},
+		AutoApply:         autoApply,
 	}
 }
 
 type SegmentTF struct {
-	ID                types.String      `tfsdk:"id"`
-	Name              types.String      `tfsdk:"name"`
-	Selector          types.String      `tfsdk:"selector"`
-	FallbackToDefault types.Bool        `tfsdk:"fallback_to_default"`
-	AutoApply         AutoApplyConfigTF `tfsdk:"auto_apply"`
-}
-
-type AutoApplyConfigTF struct {
-	Enabled bool `tfsdk:"enabled"`
+	ID                types.String `tfsdk:"id"`
+	Name              types.String `tfsdk:"name"`
+	Selector          types.String `tfsdk:"selector"`
+	FallbackToDefault types.Bool   `tfsdk:"fallback_to_default"`
+	AutoApply         types.Object `tfsdk:"auto_apply"`
 }
 
 func (e SegmentTF) ToAPIReq() Segment {
-	return Segment{
+	segment := Segment{
 		ID:                e.ID.ValueString(),
 		Name:              e.Name.ValueString(),
 		Selector:          e.Selector.ValueString(),
 		FallbackToDefault: e.FallbackToDefault.ValueBool(),
-		AutoApply: &AutoApplyConfig{
-			Enabled: e.AutoApply.Enabled,
-		},
 	}
+
+	if !e.AutoApply.IsNull() {
+		segment.AutoApply = &AutoApplyConfig{}
+		e.AutoApply.As(context.Background(), segment.AutoApply, basetypes.ObjectAsOptions{})
+	}
+
+	return segment
 }
