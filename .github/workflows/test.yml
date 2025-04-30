@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
-          cache: false
+          cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
       - run: go mod download
       - run: go build -v .
       - name: Run linters
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
-          cache: false
+          cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
       - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
         with:
           terraform_version: '1.4.*'
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: "go.mod"
-          cache: false
+          cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
       - run: go mod download
       - run: go test -v -cover ./...
         timeout-minutes: 10
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
-          cache: false
+          cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
       - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
         with:
           terraform_version: ${{ matrix.terraform }}

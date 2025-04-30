@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version-file: 'go.mod'
-          cache: false
+          cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
       - uses: grafana/shared-workflows/actions/get-vault-secrets@fa48192dac470ae356b3f7007229f3ac28c48a25 # Pinned to specific commit from 25-Apr-2025
         with:
           repo_secrets: |
