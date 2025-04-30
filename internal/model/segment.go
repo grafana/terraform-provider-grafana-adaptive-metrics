@@ -5,11 +5,11 @@ import (
 )
 
 type Segment struct {
-	ID                string          `json:"id"`
-	Name              string          `json:"name"`
-	Selector          string          `json:"selector"`
-	FallbackToDefault bool            `json:"fallback_to_default"`
-	AutoApply         AutoApplyConfig `json:"auto_apply"`
+	ID                string           `json:"id"`
+	Name              string           `json:"name"`
+	Selector          string           `json:"selector"`
+	FallbackToDefault bool             `json:"fallback_to_default"`
+	AutoApply         *AutoApplyConfig `json:"auto_apply,omitempty"`
 }
 
 type AutoApplyConfig struct {
@@ -46,7 +46,7 @@ func (e SegmentTF) ToAPIReq() Segment {
 		Name:              e.Name.ValueString(),
 		Selector:          e.Selector.ValueString(),
 		FallbackToDefault: e.FallbackToDefault.ValueBool(),
-		AutoApply: AutoApplyConfig{
+		AutoApply: &AutoApplyConfig{
 			Enabled: e.AutoApply.Enabled,
 		},
 	}
