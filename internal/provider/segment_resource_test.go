@@ -36,12 +36,16 @@ func TestAccSegmentResource(t *testing.T) {
 resource "grafana-adaptive-metrics_segment" "test" {
 	name = "test segment"
 	selector = "{namespace=\"test\"}"
+	auto_apply = {
+		enabled = true
+	}
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "true"),
 				),
 			},
 			// ImportState.
@@ -56,12 +60,16 @@ resource "grafana-adaptive-metrics_segment" "test" {
 resource "grafana-adaptive-metrics_segment" "test" {
 	name = "test segment 2"
 	selector = "{namespace=\"test\"}"
+	auto_apply = {
+		enabled = false
+	}
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment 2"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "false"),
 					func(s *terraform.State) error {
 						// Capture the exemption ID for later use.
 						segmentID = s.RootModule().Resources["grafana-adaptive-metrics_segment.test"].Primary.ID
@@ -79,12 +87,16 @@ resource "grafana-adaptive-metrics_segment" "test" {
 resource "grafana-adaptive-metrics_segment" "test" {
 	name = "test segment 2"
 	selector = "{namespace=\"test\"}"
+	auto_apply = {
+		enabled = false
+	}
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment 2"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "false"),
 				),
 			},
 			// Update + Read, setting fallback_to_default=true
@@ -100,6 +112,7 @@ resource "grafana-adaptive-metrics_segment" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment 2"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "false"),
+					resource.TestCheckNoResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply"),
 				),
 			},
 			// Delete happens automatically.
