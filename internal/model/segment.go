@@ -17,7 +17,7 @@ type Segment struct {
 }
 
 type AutoApplyConfig struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled" tfsdk:"enabled"`
 }
 
 func (e Segment) ToTF() SegmentTF {
