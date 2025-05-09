@@ -21,6 +21,8 @@ import (
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 )
 
+const privatePreviewWarning = "WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. "
+
 // Ensure AdaptiveMetricsProvider satisfies various provider interfaces.
 var _ provider.Provider = &AdaptiveMetricsProvider{}
 

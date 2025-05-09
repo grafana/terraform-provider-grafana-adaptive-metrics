@@ -74,6 +74,18 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Default:     booldefault.StaticBool(true),
 				Description: "Whether to fallback to the default segment if the selector does not match any segments.",
 			},
+			"auto_apply": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: privatePreviewWarning + "Configurations related to auto-applying recommendations.",
+				Attributes: map[string]schema.Attribute{
+					"enabled": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
+						Description: privatePreviewWarning + "Whether to automatically apply the generated recommendations in this segment.",
+					},
+				},
+			},
 		},
 	}
 }

@@ -30,8 +30,16 @@ resource "grafana-adaptive-metrics_segment" "s1" {
 
 ### Optional
 
+- `auto_apply` (Attributes) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Configurations related to auto-applying recommendations. (see [below for nested schema](#nestedatt--auto_apply))
 - `fallback_to_default` (Boolean) Whether to fallback to the default segment if the selector does not match any segments.
 
 ### Read-Only
 
 - `id` (String) A ULID that uniquely identifies the segment.
+
+<a id="nestedatt--auto_apply"></a>
+### Nested Schema for `auto_apply`
+
+Optional:
+
+- `enabled` (Boolean) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Whether to automatically apply the generated recommendations in this segment.
