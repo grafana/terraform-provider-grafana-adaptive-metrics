@@ -54,8 +54,14 @@ func (e SegmentTF) ToAPIReq() Segment {
 	}
 
 	if !e.AutoApply.IsNull() {
-		segment.AutoApply = &AutoApplyConfig{}
-		e.AutoApply.As(context.Background(), segment.AutoApply, basetypes.ObjectAsOptions{})
+		var autoApplyObj map[string]attr.Value
+		if diags := e.AutoApply.As(context.Background(), &autoApplyObj, basetypes.ObjectAsOptions{}); !diags.HasError() {
+			if enabled, ok := autoApplyObj["enabled"]; ok {
+				segment.AutoApply = &AutoApplyConfig{
+					Enabled: enabled.(types.Bool).ValueBool(),
+				}
+			}
+		}
 	}
 
 	return segment
