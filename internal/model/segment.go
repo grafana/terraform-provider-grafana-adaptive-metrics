@@ -1,11 +1,8 @@
 package model
 
 import (
-	"context"
-
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type Segment struct {
@@ -54,13 +51,11 @@ func (e SegmentTF) ToAPIReq() Segment {
 	}
 
 	if !e.AutoApply.IsNull() {
-		var autoApplyObj map[string]attr.Value
-		if diags := e.AutoApply.As(context.Background(), &autoApplyObj, basetypes.ObjectAsOptions{}); !diags.HasError() {
-			if enabled, ok := autoApplyObj["enabled"]; ok {
-				if boolVal, ok := enabled.(types.Bool); ok {
-					segment.AutoApply = &AutoApplyConfig{
-						Enabled: boolVal.ValueBool(),
-					}
+		attrs := e.AutoApply.Attributes()
+		if enabled, ok := attrs["enabled"]; ok {
+			if boolVal, ok := enabled.(types.Bool); ok {
+				segment.AutoApply = &AutoApplyConfig{
+					Enabled: boolVal.ValueBool(),
 				}
 			}
 		}
