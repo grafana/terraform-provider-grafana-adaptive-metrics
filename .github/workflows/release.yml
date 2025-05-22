@@ -8,16 +8,16 @@ on:
     tags:
       - 'v*'
 
-# Releases need permissions to read and write the repository contents.
-# GitHub considers creating releases and uploading assets as writing contents.
-permissions:
-  contents: write
-
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Needed to assume roles from Github's OIDC.
+      # Needed to assume roles from Github's OIDC.
+      id-token: write
+      
+      # Releases need permissions to read and write the repository contents.
+      # GitHub considers creating releases and uploading assets as writing contents.
+      contents: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
