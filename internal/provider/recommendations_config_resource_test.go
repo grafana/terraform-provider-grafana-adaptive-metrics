@@ -37,6 +37,23 @@ resource "grafana-adaptive-metrics_recommendations_config" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.1", "foobaz"),
 				),
 			},
+			// Update enabling auto_apply + Read.
+			{
+				Config: providerConfig + `
+resource "grafana-adaptive-metrics_recommendations_config" "test" {
+	keep_labels = ["foobar", "foobaz"]
+	auto_apply = {
+		enabled = true
+	}
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.#", "2"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.0", "foobar"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.1", "foobaz"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.enabled", "true"),
+				),
+			},
 			// Delete happens automatically.
 		},
 	})

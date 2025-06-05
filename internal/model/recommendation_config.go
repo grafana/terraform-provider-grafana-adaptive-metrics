@@ -7,7 +7,7 @@ import (
 
 type AggregationRecommendationConfiguration struct {
 	KeepLabels []string         `json:"keep_labels,omitempty" tfsdk:"keep_labels"`
-	AutoApply  *AutoApplyConfig `json:"auto_apply,omitempty"`
+	AutoApply  *AutoApplyConfig `json:"auto_apply,omitempty" tfsdk:"auto_apply"`
 }
 
 type AutoApplyConfig struct {
