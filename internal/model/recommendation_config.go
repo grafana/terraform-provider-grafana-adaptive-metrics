@@ -20,7 +20,7 @@ func (c AggregationRecommendationConfiguration) ToTF() AggregationRecommendation
 	}
 
 	if c.AutoApply != nil {
-		cfg.AutoApply, _ = types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(e.AutoApply.Enabled)})
+		cfg.AutoApply, _ = types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(c.AutoApply.Enabled)})
 	} else {
 		cfg.AutoApply = types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType})
 	}
