@@ -23,4 +23,12 @@ resource "grafana-adaptive-metrics_recommendations_config" "singleton" {
 
 ### Optional
 
+- `auto_apply` (Attributes) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Configurations related to auto-applying recommendations. (see [below for nested schema](#nestedatt--auto_apply))
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
+
+<a id="nestedatt--auto_apply"></a>
+### Nested Schema for `auto_apply`
+
+Optional:
+
+- `enabled` (Boolean) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Whether to automatically apply the generated recommendations in the default segment.
