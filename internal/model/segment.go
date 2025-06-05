@@ -13,10 +13,6 @@ type Segment struct {
 	AutoApply         *AutoApplyConfig `json:"auto_apply,omitempty"`
 }
 
-type AutoApplyConfig struct {
-	Enabled bool `json:"enabled" tfsdk:"enabled"`
-}
-
 func (e Segment) ToTF() SegmentTF {
 	segment := SegmentTF{
 		ID:                types.StringValue(e.ID),
