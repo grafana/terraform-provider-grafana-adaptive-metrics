@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -58,6 +59,18 @@ func (r *recommendationsConfigResource) Schema(_ context.Context, _ resource.Sch
 				Computed:    true,
 				Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 				Description: "The array of labels to keep; labels not in this array will be aggregated.",
+			},
+			"auto_apply": schema.SingleNestedAttribute{
+				Optional:    true,
+				Description: privatePreviewWarning + "Configurations related to auto-applying recommendations.",
+				Attributes: map[string]schema.Attribute{
+					"enabled": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
+						Description: privatePreviewWarning + "Whether to automatically apply the generated recommendations in the default segment.",
+					},
+				},
 			},
 		},
 	}
