@@ -1,3 +1,8 @@
+## v0.3.3
+
+- [FEATURE] Add policy resource.
+- [ENHANCEMENT] Add an ability to assign policy to a segment using `policy_id` field in `segment` resource.
+
 ## v0.3.0
 
 - [FEATURE] Add segment resource

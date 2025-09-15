@@ -42,6 +42,7 @@ resource "grafana-adaptive-metrics_segment" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "true"),
+					resource.TestCheckResourceAttrSet("grafana-adaptive-metrics_segment.test", "policy_id"),
 				),
 			},
 			// ImportState.

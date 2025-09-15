@@ -63,6 +63,7 @@ func (c *Client) request(method, requestPath string, query url.Values, body []by
 }
 
 func (c *Client) requestWithHeaders(method, requestPath string, query url.Values, header http.Header, body []byte, responseStruct interface{}) (http.Header, error) {
+	log.Printf("request (%s) to %s with body data: %s", method, c.BaseURL.String(), string(body))
 	req, err := c.newRequest(method, requestPath, query, header, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
