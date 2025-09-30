@@ -180,7 +180,6 @@ func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("status: 404, body: %s", e.BodyContents)
 }
 
-// extractErrorMessage tries to parse the error response and extract a meaningful error message
 func (c *Client) extractErrorMessage(bodyContents []byte, statusCode int) string {
 	// Try to parse as JSON error response
 	var apiError struct {
