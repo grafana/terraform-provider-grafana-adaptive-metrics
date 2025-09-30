@@ -2,7 +2,7 @@
 
 - Grafana website: https://grafana.com
 - Grafana Cloud website: https://grafana.com/products/cloud/
-- Grafana Adaptive Metrics website: https://grafana.com/docs/grafana-cloud/cost-management-and-billing/reduce-costs/metrics-costs/control-metrics-usage-via-grafana-adaptive-metrics/
+- Grafana Adaptive Metrics website: https://grafana.com/docs/grafana-cloud/adaptive-telemetry/adaptive-metrics/
 
 ## Requirements
 

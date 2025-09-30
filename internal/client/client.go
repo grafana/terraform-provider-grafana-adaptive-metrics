@@ -24,6 +24,9 @@ type Client struct {
 	// This mutex is necessary for now because the API does not support
 	// concurrent writes to the segments endpoint.
 	segmentMutex *sync.Mutex
+	// This mutex is necessary for now because the API does not support
+	// concurrent writes to the policies endpoint.
+	policyMutex *sync.Mutex
 }
 
 // Config contains client configuration.
@@ -54,6 +57,7 @@ func New(baseURL string, cfg *Config) (*Client, error) {
 		client:  cfg.HttpClient,
 
 		segmentMutex: &sync.Mutex{},
+		policyMutex:  &sync.Mutex{},
 	}, nil
 }
 
@@ -91,7 +95,9 @@ func (c *Client) requestWithHeaders(method, requestPath string, query url.Values
 			BodyContents: bodyContents,
 		}
 	case resp.StatusCode >= 400:
-		return nil, fmt.Errorf("status: %d, body: %v", resp.StatusCode, string(bodyContents))
+		// Try to parse the error response to extract meaningful error message
+		errorMsg := c.extractErrorMessage(bodyContents, resp.StatusCode)
+		return nil, fmt.Errorf("%s", errorMsg)
 	}
 
 	if responseStruct == nil {
@@ -172,4 +178,19 @@ type ErrNotFound struct {
 
 func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("status: 404, body: %s", e.BodyContents)
+}
+
+// extractErrorMessage tries to parse the error response and extract a meaningful error message
+func (c *Client) extractErrorMessage(bodyContents []byte, statusCode int) string {
+	// Try to parse as JSON error response
+	var apiError struct {
+		Error string `json:"error"`
+	}
+
+	if err := json.Unmarshal(bodyContents, &apiError); err == nil && apiError.Error != "" {
+		return fmt.Sprintf("API error (status %d): %s", statusCode, apiError.Error)
+	}
+
+	// Fallback to showing the raw response
+	return fmt.Sprintf("status: %d, body: %s", statusCode, string(bodyContents))
 }
