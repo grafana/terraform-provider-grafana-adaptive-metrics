@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -18,10 +17,35 @@ type segmentResource struct {
 	client *client.Client
 }
 
+func (e *segmentResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var config model.SegmentTF
+	var state model.SegmentTF
+	var plan model.SegmentTF
+
+	// Config = what user wrote in .tf
+	req.Config.Get(ctx, &config)
+	// State = what Terraform knew before
+	req.State.Get(ctx, &state)
+	// Plan = what Terraform has planned so far
+	req.Plan.Get(ctx, &plan)
+
+	// if policy_id was removed on already created resource it's not a default policy, override a plan to set policy_id to default policy ID.
+	if !state.ID.IsNull() && config.PolicyID.IsNull() && state.PolicyID.String() != state.ID.String() {
+		resp.Diagnostics.AddWarning(
+			fmt.Sprintf("The segment %q will be reset to default policy.", config.Name.ValueString()),
+			"User removed policy_id field, setting policy_id to default policy ID.",
+		)
+		plan.PolicyID = state.ID
+	}
+
+	resp.Plan.Set(ctx, &plan)
+}
+
 var (
 	_ resource.Resource                = &segmentResource{}
 	_ resource.ResourceWithConfigure   = &segmentResource{}
 	_ resource.ResourceWithImportState = &segmentResource{}
+	_ resource.ResourceWithModifyPlan  = &segmentResource{}
 )
 
 func newSegmentResource() resource.Resource {
@@ -85,6 +109,11 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						Description: privatePreviewWarning + "Whether to automatically apply the generated recommendations in this segment.",
 					},
 				},
+			},
+			"policy_id": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: privatePreviewWarning + "ID of the policy applied to this segment.",
 			},
 		},
 	}
