@@ -41,6 +41,23 @@ provider_installation {
 }
 ```
 
+### Common usage patterns
+
+#### Merging recommendations with custom rules
+
+When using both recommendations and custom rules, it's important to understand that Terraform resources are independent. If you define the same metric in both:
+- A `grafana-adaptive-metrics_ruleset` resource (e.g., from recommendations), and
+- A `grafana-adaptive-metrics_rule` resource (or another ruleset)
+
+They will conflict with each other, as both resources will attempt to manage the same rule.
+
+**Recommended approach**: Use Terraform's data manipulation capabilities to merge recommendations with custom rules in a single `grafana-adaptive-metrics_ruleset` resource. This gives you full control over precedence and conflict resolution.
+
+See `examples/resources/grafana-adaptive-metrics_ruleset/merge_recommendations_with_custom_rules.tf` for a complete example showing how to:
+- Apply most recommendations automatically
+- Override specific recommendations with custom rules
+- Exclude certain metrics from recommendations entirely
+
 ### Debugging the provider
 
 1. Build the provider:

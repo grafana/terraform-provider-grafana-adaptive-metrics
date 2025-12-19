@@ -52,6 +52,7 @@ func (r *ruleSetResource) Metadata(_ context.Context, req resource.MetadataReque
 
 func (r *ruleSetResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Manages a complete ruleset for a segment. Note: Rules defined in this resource will conflict with individual rules created via grafana-adaptive-metrics_rule resources. To combine recommendations with custom rules, use Terraform's data manipulation capabilities (see examples).",
 		Attributes: map[string]schema.Attribute{
 			"segment": schema.StringAttribute{
 				Optional:    true,
@@ -61,7 +62,8 @@ func (r *ruleSetResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"rules": schema.ListNestedAttribute{
-				Required: true,
+				Required:    true,
+				Description: "The complete list of aggregation rules for this segment. This will replace all existing rules in the segment.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: ruleAttributes(false),
 				},

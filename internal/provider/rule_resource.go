@@ -54,7 +54,8 @@ func (r *ruleResource) Metadata(_ context.Context, req resource.MetadataRequest,
 
 func (r *ruleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	ruleSchemaCopy := schema.Schema{
-		Attributes: ruleAttributes(true),
+		Description: "Manages an individual aggregation rule. Note: Rules defined using this resource will conflict with rules in grafana-adaptive-metrics_ruleset resources. To use both individual rules and rulesets (e.g., from recommendations), use Terraform's data manipulation capabilities to merge them into a single ruleset resource.",
+		Attributes:  ruleAttributes(true),
 	}
 	// These fields are not part of the shared schema, but are used by the provider to manage the resource.
 	ruleSchemaCopy.Attributes["auto_import"] = schema.BoolAttribute{
