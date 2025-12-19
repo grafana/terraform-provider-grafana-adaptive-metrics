@@ -3,12 +3,12 @@
 page_title: "grafana-adaptive-metrics_rule Resource - terraform-provider-grafana-adaptive-metrics"
 subcategory: ""
 description: |-
-  
+  Manages an individual aggregation rule. Note: Rules defined using this resource will conflict with rules in grafana-adaptive-metrics_ruleset resources. To use both individual rules and rulesets (e.g., from recommendations), use Terraform's data manipulation capabilities to merge them into a single ruleset resource.
 ---
 
 # grafana-adaptive-metrics_rule (Resource)
 
-
+Manages an individual aggregation rule. Note: Rules defined using this resource will conflict with rules in grafana-adaptive-metrics_ruleset resources. To use both individual rules and rulesets (e.g., from recommendations), use Terraform's data manipulation capabilities to merge them into a single ruleset resource.
 
 ## Example Usage
 

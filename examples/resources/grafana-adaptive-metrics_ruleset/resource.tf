@@ -1,4 +1,3 @@
-
 # Apply an inline ruleset
 resource "grafana-adaptive-metrics_ruleset" "default" {
   rules = [
@@ -15,7 +14,7 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 }
 
 # Apply a ruleset from a file
-resource "grafana-adaptive-metrics_ruleset" "default" {
+resource "grafana-adaptive-metrics_ruleset" "from_file" {
   rules = jsondecode(file("${path.module}/rules.json"))
 }
 
@@ -23,6 +22,6 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 data "grafana-adaptive-metrics_recommendations" "default" {
 }
 
-resource "grafana-adaptive-metrics_ruleset" "default" {
+resource "grafana-adaptive-metrics_ruleset" "recommendations" {
   rules = data.grafana-adaptive-metrics_recommendations.default.recommendations
 }

@@ -3,12 +3,12 @@
 page_title: "grafana-adaptive-metrics_ruleset Resource - terraform-provider-grafana-adaptive-metrics"
 subcategory: ""
 description: |-
-  
+  Manages a complete ruleset for a segment. Note: Rules defined in this resource will conflict with individual rules created via grafana-adaptive-metrics_rule resources. To combine recommendations with custom rules, use Terraform's data manipulation capabilities (see examples).
 ---
 
 # grafana-adaptive-metrics_ruleset (Resource)
 
-
+Manages a complete ruleset for a segment. Note: Rules defined in this resource will conflict with individual rules created via grafana-adaptive-metrics_rule resources. To combine recommendations with custom rules, use Terraform's data manipulation capabilities (see examples).
 
 ## Example Usage
 
@@ -29,7 +29,7 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 }
 
 # Apply a ruleset from a file
-resource "grafana-adaptive-metrics_ruleset" "default" {
+resource "grafana-adaptive-metrics_ruleset" "from_file" {
   rules = jsondecode(file("${path.module}/rules.json"))
 }
 
@@ -37,7 +37,7 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 data "grafana-adaptive-metrics_recommendations" "default" {
 }
 
-resource "grafana-adaptive-metrics_ruleset" "default" {
+resource "grafana-adaptive-metrics_ruleset" "recommendations" {
   rules = data.grafana-adaptive-metrics_recommendations.default.recommendations
 }
 ```
@@ -47,7 +47,7 @@ resource "grafana-adaptive-metrics_ruleset" "default" {
 
 ### Required
 
-- `rules` (Attributes List) (see [below for nested schema](#nestedatt--rules))
+- `rules` (Attributes List) The complete list of aggregation rules for this segment. This will replace all existing rules in the segment. (see [below for nested schema](#nestedatt--rules))
 
 ### Optional
 
