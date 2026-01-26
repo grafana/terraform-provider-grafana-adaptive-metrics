@@ -102,13 +102,13 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"auto_apply": schema.SingleNestedAttribute{
 				Optional:    true,
 				Computed:    true,
-				Description: privatePreviewWarning + "Configurations related to auto-applying recommendations.",
+				Description: "Configurations related to auto-applying recommendations.",
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
-						Description: privatePreviewWarning + "Whether to automatically apply the generated recommendations in this segment.",
+						Description: "Whether to automatically apply the generated recommendations in this segment.",
 					},
 				},
 			},

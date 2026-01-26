@@ -62,7 +62,7 @@ func (r *recommendationsConfigResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"auto_apply": schema.SingleNestedAttribute{
 				Optional:    true,
-				Description: privatePreviewWarning + "Configurations related to auto-applying recommendations.",
+				Description: "Configurations related to auto-applying recommendations.",
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
 						Optional:    true,
