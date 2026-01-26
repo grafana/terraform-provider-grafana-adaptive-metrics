@@ -43,4 +43,4 @@ resource "grafana-adaptive-metrics_segment" "s1" {
 
 Optional:
 
-- `enabled` (Boolean) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Whether to automatically apply the generated recommendations in this segment.
+- `enabled` (Boolean) Whether to automatically apply the generated recommendations in this segment.
