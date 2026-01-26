@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -100,6 +101,7 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"auto_apply": schema.SingleNestedAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: privatePreviewWarning + "Configurations related to auto-applying recommendations.",
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
