@@ -104,7 +104,7 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
-      - uses: grafana/shared-workflows/actions/get-vault-secrets@fa48192dac470ae356b3f7007229f3ac28c48a25 # Pinned to specific commit from 25-Apr-2025
+      - uses: grafana/shared-workflows/actions/get-vault-secrets@5cec40ba1a943db268a9bb33f208c006b161d372 # Pinned to specific commit from 25-Apr-2025
         with:
           repo_secrets: |
             GRAFANA_AM_API_URL=cloud-tests:api-url

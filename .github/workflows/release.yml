@@ -28,7 +28,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
-      - uses: grafana/shared-workflows/actions/get-vault-secrets@fa48192dac470ae356b3f7007229f3ac28c48a25 # Pinned to specific commit from 25-Apr-2025
+      - uses: grafana/shared-workflows/actions/get-vault-secrets@5cec40ba1a943db268a9bb33f208c006b161d372 # Pinned to specific commit from 25-Apr-2025
         with:
           repo_secrets: |
             GPG_PRIVATE_KEY=release:private-key
