@@ -87,11 +87,6 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					},
 				},
 			},
-			"policy_id": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: privatePreviewWarning + "ID of the policy applied to this segment.",
-			},
 		},
 	}
 }

@@ -24,9 +24,6 @@ type Client struct {
 	// This mutex is necessary for now because the API does not support
 	// concurrent writes to the segments endpoint.
 	segmentMutex *sync.Mutex
-	// This mutex is necessary for now because the API does not support
-	// concurrent writes to the policies endpoint.
-	policyMutex *sync.Mutex
 }
 
 // Config contains client configuration.
@@ -57,7 +54,6 @@ func New(baseURL string, cfg *Config) (*Client, error) {
 		client:  cfg.HttpClient,
 
 		segmentMutex: &sync.Mutex{},
-		policyMutex:  &sync.Mutex{},
 	}, nil
 }
 
