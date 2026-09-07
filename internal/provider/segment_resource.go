@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/model"
 )
@@ -84,6 +86,19 @@ func (e *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
 						Description: "Whether to automatically apply the generated recommendations in this segment.",
+					},
+					"gate": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "The admission policy applied when auto-apply runs. If omitted, every recommendation is applied.",
+						Attributes: map[string]schema.Attribute{
+							"policy": schema.StringAttribute{
+								Required:    true,
+								Description: "The gate policy. `unbounded` applies every recommendation. `no-increase` limits the run to a net series increase of zero or less.",
+								Validators: []validator.String{
+									stringvalidator.OneOf(model.GatePolicyUnbounded, model.GatePolicyNoIncrease),
+								},
+							},
+						},
 					},
 				},
 			},

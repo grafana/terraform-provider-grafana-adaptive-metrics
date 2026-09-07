@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAccSegmentResource(t *testing.T) {
+func TestSegmentResource_Acceptance(t *testing.T) {
 	CheckAccTestsEnabled(t)
 
 	t.Cleanup(func() {
@@ -94,12 +94,20 @@ resource "grafana-adaptive-metrics_segment" "test" {
 	name = "test segment 2"
 	selector = "{namespace=\"test\"}"
 	fallback_to_default = false
+	auto_apply = {
+		enabled = true
+		gate = {
+			policy = "no-increase"
+		}
+	}
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment 2"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "false"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.gate.policy", "no-increase"),
 				),
 			},
 			// Delete happens automatically.

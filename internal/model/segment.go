@@ -1,9 +1,6 @@
 package model
 
-import (
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-)
+import "github.com/hashicorp/terraform-plugin-framework/types"
 
 type Segment struct {
 	ID                string           `json:"id"`
@@ -21,11 +18,7 @@ func (e Segment) ToTF() SegmentTF {
 		FallbackToDefault: types.BoolValue(e.FallbackToDefault),
 	}
 
-	if e.AutoApply != nil {
-		segment.AutoApply, _ = types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(e.AutoApply.Enabled)})
-	} else {
-		segment.AutoApply = types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType})
-	}
+	segment.AutoApply = autoApplyConfigToTF(e.AutoApply)
 
 	return segment
 }
@@ -46,16 +39,7 @@ func (e SegmentTF) ToAPIReq() Segment {
 		FallbackToDefault: e.FallbackToDefault.ValueBool(),
 	}
 
-	if !e.AutoApply.IsNull() {
-		attrs := e.AutoApply.Attributes()
-		if enabled, ok := attrs["enabled"]; ok {
-			if boolVal, ok := enabled.(types.Bool); ok {
-				segment.AutoApply = &AutoApplyConfig{
-					Enabled: boolVal.ValueBool(),
-				}
-			}
-		}
-	}
+	segment.AutoApply = autoApplyConfigFromTF(e.AutoApply)
 
 	return segment
 }

@@ -43,3 +43,11 @@ resource "grafana-adaptive-metrics_segment" "s1" {
 Optional:
 
 - `enabled` (Boolean) Whether to automatically apply the generated recommendations in this segment.
+- `gate` (Attributes) The admission policy applied when auto-apply runs. If omitted, every recommendation is applied. (see [below for nested schema](#nestedatt--auto_apply--gate))
+
+<a id="nestedatt--auto_apply--gate"></a>
+### Nested Schema for `auto_apply.gate`
+
+Required:
+
+- `policy` (String) The gate policy. `unbounded` applies every recommendation. `no-increase` limits the run to a net series increase of zero or less.
