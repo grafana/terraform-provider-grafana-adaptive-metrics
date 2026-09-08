@@ -1,26 +1,28 @@
-# Visit https://golangci-lint.run/ for usage documentation
-# and information on other useful linters
+version: "2"
+
 issues:
-  max-per-linter: 0
+  max-issues-per-linter: 0
   max-same-issues: 0
 
 linters:
-  disable-all: true
+  default: none
   enable:
+    - copyloopvar
     - durationcheck
     - errcheck
-    - copyloopvar
     - forcetypeassert
     - godot
-    - gofmt
-    - gosimple
+    - govet
     - ineffassign
     - makezero
     - misspell
     - nilerr
     - predeclared
     - staticcheck
-    - usetesting
     - unconvert
     - unused
-    - govet
+    - usetesting
+
+formatters:
+  enable:
+    - gofmt

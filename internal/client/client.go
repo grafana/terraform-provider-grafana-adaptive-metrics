@@ -73,7 +73,11 @@ func (c *Client) requestWithHeaders(method, requestPath string, query url.Values
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Printf("failed to close response body: %v", err)
+		}
+	}()
 
 	bodyContents, err := io.ReadAll(resp.Body)
 	if err != nil {
