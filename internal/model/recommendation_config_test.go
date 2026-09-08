@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,45 +21,46 @@ func TestRecommendationConfig_ToTF(t *testing.T) {
 			},
 			expected: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply:  types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType}),
+				AutoApply:  testNullAutoApplyObject(),
 			},
 		},
 		{
-			name: "recommendation config with auto_apply enabled",
+			name: "recommendation config with auto_apply and no gate",
+			input: AggregationRecommendationConfiguration{
+				KeepLabels: []string{"namespace", "namespace2"},
+				AutoApply:  &AutoApplyConfig{Enabled: true},
+			},
+			expected: AggregationRecommendationConfigurationTF{
+				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
+				AutoApply:  testAutoApplyObject(true, nil),
+			},
+		},
+		{
+			name: "recommendation config with no-increase gate",
 			input: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
 				AutoApply: &AutoApplyConfig{
 					Enabled: true,
+					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
 			},
 			expected: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(true)},
-					)
-					return obj
-				}(),
+				AutoApply:  testAutoApplyObject(true, testStringPointer(GatePolicyNoIncrease)),
 			},
 		},
 		{
-			name: "recommendation config with auto_apply disabled",
+			name: "recommendation config with unbounded gate",
 			input: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
 				AutoApply: &AutoApplyConfig{
 					Enabled: false,
+					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
 			},
 			expected: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(false)},
-					)
-					return obj
-				}(),
+				AutoApply:  testAutoApplyObject(false, testStringPointer(GatePolicyUnbounded)),
 			},
 		},
 	}
@@ -84,7 +84,7 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 			name: "basic recommendation config without auto_apply",
 			input: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply:  types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType}),
+				AutoApply:  testNullAutoApplyObject(),
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
@@ -92,40 +92,41 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 			},
 		},
 		{
-			name: "recommendation config with auto_apply enabled",
+			name: "recommendation config with auto_apply and no gate",
 			input: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(true)},
-					)
-					return obj
-				}(),
+				AutoApply:  testAutoApplyObject(true, nil),
+			},
+			expected: AggregationRecommendationConfiguration{
+				KeepLabels: []string{"namespace", "namespace2"},
+				AutoApply:  &AutoApplyConfig{Enabled: true},
+			},
+		},
+		{
+			name: "recommendation config with no-increase gate",
+			input: AggregationRecommendationConfigurationTF{
+				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
+				AutoApply:  testAutoApplyObject(true, testStringPointer(GatePolicyNoIncrease)),
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
 				AutoApply: &AutoApplyConfig{
 					Enabled: true,
+					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
 			},
 		},
 		{
-			name: "recommendation config with auto_apply disabled",
+			name: "recommendation config with unbounded gate",
 			input: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(false)},
-					)
-					return obj
-				}(),
+				AutoApply:  testAutoApplyObject(false, testStringPointer(GatePolicyUnbounded)),
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
 				AutoApply: &AutoApplyConfig{
 					Enabled: false,
+					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
 			},
 		},
@@ -135,12 +136,7 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.input.ToAPIReq()
 			assert.Equal(t, tt.expected.KeepLabels, result.KeepLabels)
-			if tt.expected.AutoApply == nil {
-				assert.Nil(t, result.AutoApply)
-			} else {
-				assert.NotNil(t, result.AutoApply)
-				assert.Equal(t, tt.expected.AutoApply.Enabled, result.AutoApply.Enabled)
-			}
+			assert.Equal(t, tt.expected.AutoApply, result.AutoApply)
 		})
 	}
 }

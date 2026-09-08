@@ -32,3 +32,11 @@ resource "grafana-adaptive-metrics_recommendations_config" "singleton" {
 Optional:
 
 - `enabled` (Boolean) WARNING: contact Grafana Cloud support before use. This feature is in private preview and may change without notice, including in ways that may break your configuration. Whether to automatically apply the generated recommendations in the default segment.
+- `gate` (Attributes) The admission policy applied when auto-apply runs. If omitted, every recommendation is applied. (see [below for nested schema](#nestedatt--auto_apply--gate))
+
+<a id="nestedatt--auto_apply--gate"></a>
+### Nested Schema for `auto_apply.gate`
+
+Required:
+
+- `policy` (String) The gate policy. `unbounded` applies every recommendation. `no-increase` limits the run to a net series increase of zero or less.

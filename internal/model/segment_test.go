@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,11 +27,28 @@ func TestSegment_ToTF(t *testing.T) {
 				Name:              types.StringValue("test-name"),
 				Selector:          types.StringValue("{namespace=\"test\"}"),
 				FallbackToDefault: types.BoolValue(true),
-				AutoApply:         types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType}),
+				AutoApply:         testNullAutoApplyObject(),
 			},
 		},
 		{
-			name: "segment with auto_apply enabled",
+			name: "segment with auto_apply and no gate",
+			input: Segment{
+				ID:                "test-id-4",
+				Name:              "test-name-4",
+				Selector:          "{namespace=\"dev\"}",
+				FallbackToDefault: true,
+				AutoApply:         &AutoApplyConfig{Enabled: true},
+			},
+			expected: SegmentTF{
+				ID:                types.StringValue("test-id-4"),
+				Name:              types.StringValue("test-name-4"),
+				Selector:          types.StringValue("{namespace=\"dev\"}"),
+				FallbackToDefault: types.BoolValue(true),
+				AutoApply:         testAutoApplyObject(true, nil),
+			},
+		},
+		{
+			name: "segment with no-increase gate",
 			input: Segment{
 				ID:                "test-id-2",
 				Name:              "test-name-2",
@@ -40,6 +56,7 @@ func TestSegment_ToTF(t *testing.T) {
 				FallbackToDefault: false,
 				AutoApply: &AutoApplyConfig{
 					Enabled: true,
+					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
 			},
 			expected: SegmentTF{
@@ -47,17 +64,11 @@ func TestSegment_ToTF(t *testing.T) {
 				Name:              types.StringValue("test-name-2"),
 				Selector:          types.StringValue("{namespace=\"prod\"}"),
 				FallbackToDefault: types.BoolValue(false),
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(true)},
-					)
-					return obj
-				}(),
+				AutoApply:         testAutoApplyObject(true, testStringPointer(GatePolicyNoIncrease)),
 			},
 		},
 		{
-			name: "segment with auto_apply disabled",
+			name: "segment with unbounded gate",
 			input: Segment{
 				ID:                "test-id-3",
 				Name:              "test-name-3",
@@ -65,6 +76,7 @@ func TestSegment_ToTF(t *testing.T) {
 				FallbackToDefault: true,
 				AutoApply: &AutoApplyConfig{
 					Enabled: false,
+					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
 			},
 			expected: SegmentTF{
@@ -72,13 +84,7 @@ func TestSegment_ToTF(t *testing.T) {
 				Name:              types.StringValue("test-name-3"),
 				Selector:          types.StringValue("{namespace=\"staging\"}"),
 				FallbackToDefault: types.BoolValue(true),
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(false)},
-					)
-					return obj
-				}(),
+				AutoApply:         testAutoApplyObject(false, testStringPointer(GatePolicyUnbounded)),
 			},
 		},
 	}
@@ -108,7 +114,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				Name:              types.StringValue("test-name"),
 				Selector:          types.StringValue("{namespace=\"test\"}"),
 				FallbackToDefault: types.BoolValue(true),
-				AutoApply:         types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType}),
+				AutoApply:         testNullAutoApplyObject(),
 			},
 			expected: Segment{
 				ID:                "test-id",
@@ -119,19 +125,30 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 			},
 		},
 		{
-			name: "segment with auto_apply enabled",
+			name: "segment with auto_apply and no gate",
+			input: SegmentTF{
+				ID:                types.StringValue("test-id-4"),
+				Name:              types.StringValue("test-name-4"),
+				Selector:          types.StringValue("{namespace=\"dev\"}"),
+				FallbackToDefault: types.BoolValue(true),
+				AutoApply:         testAutoApplyObject(true, nil),
+			},
+			expected: Segment{
+				ID:                "test-id-4",
+				Name:              "test-name-4",
+				Selector:          "{namespace=\"dev\"}",
+				FallbackToDefault: true,
+				AutoApply:         &AutoApplyConfig{Enabled: true},
+			},
+		},
+		{
+			name: "segment with no-increase gate",
 			input: SegmentTF{
 				ID:                types.StringValue("test-id-2"),
 				Name:              types.StringValue("test-name-2"),
 				Selector:          types.StringValue("{namespace=\"prod\"}"),
 				FallbackToDefault: types.BoolValue(false),
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(true)},
-					)
-					return obj
-				}(),
+				AutoApply:         testAutoApplyObject(true, testStringPointer(GatePolicyNoIncrease)),
 			},
 			expected: Segment{
 				ID:                "test-id-2",
@@ -140,23 +157,18 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				FallbackToDefault: false,
 				AutoApply: &AutoApplyConfig{
 					Enabled: true,
+					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
 			},
 		},
 		{
-			name: "segment with auto_apply disabled",
+			name: "segment with unbounded gate",
 			input: SegmentTF{
 				ID:                types.StringValue("test-id-3"),
 				Name:              types.StringValue("test-name-3"),
 				Selector:          types.StringValue("{namespace=\"staging\"}"),
 				FallbackToDefault: types.BoolValue(true),
-				AutoApply: func() types.Object {
-					obj, _ := types.ObjectValue(
-						map[string]attr.Type{"enabled": types.BoolType},
-						map[string]attr.Value{"enabled": types.BoolValue(false)},
-					)
-					return obj
-				}(),
+				AutoApply:         testAutoApplyObject(false, testStringPointer(GatePolicyUnbounded)),
 			},
 			expected: Segment{
 				ID:                "test-id-3",
@@ -165,6 +177,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				FallbackToDefault: true,
 				AutoApply: &AutoApplyConfig{
 					Enabled: false,
+					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
 			},
 		},
@@ -177,12 +190,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 			assert.Equal(t, tt.expected.Name, result.Name)
 			assert.Equal(t, tt.expected.Selector, result.Selector)
 			assert.Equal(t, tt.expected.FallbackToDefault, result.FallbackToDefault)
-			if tt.expected.AutoApply == nil {
-				assert.Nil(t, result.AutoApply)
-			} else {
-				assert.NotNil(t, result.AutoApply)
-				assert.Equal(t, tt.expected.AutoApply.Enabled, result.AutoApply.Enabled)
-			}
+			assert.Equal(t, tt.expected.AutoApply, result.AutoApply)
 		})
 	}
 }

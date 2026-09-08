@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccRecommendationsConfigResource(t *testing.T) {
+func TestRecommendationsConfigResource_Acceptance(t *testing.T) {
 	CheckAccTestsEnabled(t)
 
 	resource.Test(t, resource.TestCase{
@@ -44,6 +44,9 @@ resource "grafana-adaptive-metrics_recommendations_config" "test" {
 	keep_labels = ["foobar", "foobaz"]
 	auto_apply = {
 		enabled = true
+		gate = {
+			policy = "no-increase"
+		}
 	}
 }
 `,
@@ -52,6 +55,7 @@ resource "grafana-adaptive-metrics_recommendations_config" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.0", "foobar"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.1", "foobaz"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.enabled", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.gate.policy", "no-increase"),
 				),
 			},
 			// Delete happens automatically.

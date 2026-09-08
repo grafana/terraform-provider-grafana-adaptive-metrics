@@ -1,5 +1,6 @@
 ## Unreleased
 
+- [FEATURE] Add auto-apply gate policy support to segment and recommendations config resources.
 - [BREAKING] Remove the `grafana-adaptive-metrics_policy` resource and the `policy_id` field from the segment resource.
 
 ## v0.3.3

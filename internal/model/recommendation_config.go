@@ -10,8 +10,75 @@ type AggregationRecommendationConfiguration struct {
 	AutoApply  *AutoApplyConfig `json:"auto_apply,omitempty" tfsdk:"auto_apply"`
 }
 
+const (
+	GatePolicyUnbounded  = "unbounded"
+	GatePolicyNoIncrease = "no-increase"
+)
+
 type AutoApplyConfig struct {
-	Enabled bool `json:"enabled" tfsdk:"enabled"`
+	Enabled bool        `json:"enabled" tfsdk:"enabled"`
+	Gate    *GateConfig `json:"gate,omitempty" tfsdk:"gate"`
+}
+
+type GateConfig struct {
+	Policy string `json:"policy,omitempty" tfsdk:"policy"`
+}
+
+func gateAttributeTypes() map[string]attr.Type {
+	return map[string]attr.Type{"policy": types.StringType}
+}
+
+func autoApplyAttributeTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"enabled": types.BoolType,
+		"gate":    types.ObjectType{AttrTypes: gateAttributeTypes()},
+	}
+}
+
+func autoApplyConfigToTF(config *AutoApplyConfig) types.Object {
+	if config == nil {
+		return types.ObjectNull(autoApplyAttributeTypes())
+	}
+
+	gate := types.ObjectNull(gateAttributeTypes())
+	if config.Gate != nil {
+		gate = types.ObjectValueMust(
+			gateAttributeTypes(),
+			map[string]attr.Value{"policy": types.StringValue(config.Gate.Policy)},
+		)
+	}
+
+	return types.ObjectValueMust(
+		autoApplyAttributeTypes(),
+		map[string]attr.Value{
+			"enabled": types.BoolValue(config.Enabled),
+			"gate":    gate,
+		},
+	)
+}
+
+func autoApplyConfigFromTF(value types.Object) *AutoApplyConfig {
+	if value.IsNull() || value.IsUnknown() {
+		return nil
+	}
+
+	enabled, ok := value.Attributes()["enabled"].(types.Bool)
+	if !ok {
+		return nil
+	}
+
+	config := &AutoApplyConfig{Enabled: enabled.ValueBool()}
+	gate, ok := value.Attributes()["gate"].(types.Object)
+	if !ok || gate.IsNull() || gate.IsUnknown() {
+		return config
+	}
+
+	policy, ok := gate.Attributes()["policy"].(types.String)
+	if ok && !policy.IsNull() && !policy.IsUnknown() {
+		config.Gate = &GateConfig{Policy: policy.ValueString()}
+	}
+
+	return config
 }
 
 func (c AggregationRecommendationConfiguration) ToTF() AggregationRecommendationConfigurationTF {
@@ -19,11 +86,7 @@ func (c AggregationRecommendationConfiguration) ToTF() AggregationRecommendation
 		KeepLabels: toTypesStringSlice(c.KeepLabels),
 	}
 
-	if c.AutoApply != nil {
-		cfg.AutoApply, _ = types.ObjectValue(map[string]attr.Type{"enabled": types.BoolType}, map[string]attr.Value{"enabled": types.BoolValue(c.AutoApply.Enabled)})
-	} else {
-		cfg.AutoApply = types.ObjectNull(map[string]attr.Type{"enabled": types.BoolType})
-	}
+	cfg.AutoApply = autoApplyConfigToTF(c.AutoApply)
 
 	return cfg
 }
@@ -39,16 +102,7 @@ func (c AggregationRecommendationConfigurationTF) ToAPIReq() AggregationRecommen
 		KeepLabels: toStringSlice(c.KeepLabels),
 	}
 
-	if !c.AutoApply.IsNull() {
-		attrs := c.AutoApply.Attributes()
-		if enabled, ok := attrs["enabled"]; ok {
-			if boolVal, ok := enabled.(types.Bool); ok {
-				cfg.AutoApply = &AutoApplyConfig{
-					Enabled: boolVal.ValueBool(),
-				}
-			}
-		}
-	}
+	cfg.AutoApply = autoApplyConfigFromTF(c.AutoApply)
 
 	return cfg
 }
