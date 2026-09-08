@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -80,7 +79,7 @@ func (r *recommendationsConfigResource) Schema(_ context.Context, _ resource.Sch
 								Required:    true,
 								Description: "The gate policy. `unbounded` applies every recommendation. `no-increase` limits the run to a net series increase of zero or less.",
 								Validators: []validator.String{
-									stringvalidator.OneOf(model.GatePolicyUnbounded, model.GatePolicyNoIncrease),
+									gatePolicyValidator{},
 								},
 							},
 						},
