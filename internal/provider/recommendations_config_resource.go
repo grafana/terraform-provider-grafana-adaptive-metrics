@@ -69,7 +69,7 @@ func (r *recommendationsConfigResource) Schema(_ context.Context, _ resource.Sch
 						Optional:    true,
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
-						Description: privatePreviewWarning + "Whether to automatically apply the generated recommendations in the default segment.",
+						Description: "Whether to automatically apply the generated recommendations in the default segment.",
 					},
 					"gate": schema.SingleNestedAttribute{
 						Optional:    true,
