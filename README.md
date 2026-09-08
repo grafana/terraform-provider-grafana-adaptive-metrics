@@ -7,7 +7,7 @@
 ## Requirements
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.20
+- [Go](https://go.dev/doc/install) >= 1.26.8
 
 ## Development
 
