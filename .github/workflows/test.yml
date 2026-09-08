@@ -112,3 +112,15 @@ jobs:
           TF_ACC: "1"
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
+
+  acceptance_test_complete:
+    name: Acceptance Tests Complete
+    if: always()
+    needs: acceptance_test
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Check acceptance test result
+        env:
+          RESULT: ${{ needs.acceptance_test.result }}
+        run: test "$RESULT" = "success"
