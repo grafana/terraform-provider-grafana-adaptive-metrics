@@ -24,7 +24,7 @@ jobs:
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: 'go.mod'
           cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
