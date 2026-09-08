@@ -22,9 +22,12 @@ func TestAutoApplyGate_Validation(t *testing.T) {
 			resourceUnderTest.Schema(t.Context(), resource.SchemaRequest{}, &schemaResponse)
 			require.False(t, schemaResponse.Diagnostics.HasError())
 
-			autoApply := schemaResponse.Schema.Attributes["auto_apply"].(resourceschema.SingleNestedAttribute)
-			gate := autoApply.Attributes["gate"].(resourceschema.SingleNestedAttribute)
-			policy := gate.Attributes["policy"].(resourceschema.StringAttribute)
+			autoApply, ok := schemaResponse.Schema.Attributes["auto_apply"].(resourceschema.SingleNestedAttribute)
+			require.True(t, ok)
+			gate, ok := autoApply.Attributes["gate"].(resourceschema.SingleNestedAttribute)
+			require.True(t, ok)
+			policy, ok := gate.Attributes["policy"].(resourceschema.StringAttribute)
+			require.True(t, ok)
 			require.Len(t, policy.Validators, 1)
 
 			for _, value := range []string{"unbounded", "no-increase"} {
