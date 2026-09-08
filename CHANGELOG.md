@@ -1,3 +1,7 @@
+## Unreleased
+
+- [BREAKING] Remove the `grafana-adaptive-metrics_policy` resource and the `policy_id` field from the segment resource.
+
 ## v0.3.3
 
 - [FEATURE] Add policy resource.

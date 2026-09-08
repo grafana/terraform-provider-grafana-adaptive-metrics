@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExtractErrorMessage(t *testing.T) {
+func TestClient_ExtractErrorMessage(t *testing.T) {
 	client := &Client{}
 
 	t.Run("JSON error response", func(t *testing.T) {
-		body := []byte(`{"error": "error updating policy with ID \"01K6AY1A5X6C40K6PJE2YNB6FN\""}`)
+		body := []byte(`{"error": "request failed for resource \"01K6AY1A5X6C40K6PJE2YNB6FN\""}`)
 		errorMsg := client.extractErrorMessage(body, 500)
-		require.Equal(t, "API error (status 500): error updating policy with ID \"01K6AY1A5X6C40K6PJE2YNB6FN\"", errorMsg)
+		require.Equal(t, "API error (status 500): request failed for resource \"01K6AY1A5X6C40K6PJE2YNB6FN\"", errorMsg)
 	})
 
 	t.Run("Invalid JSON response", func(t *testing.T) {

@@ -11,7 +11,6 @@ type Segment struct {
 	Selector          string           `json:"selector"`
 	FallbackToDefault bool             `json:"fallback_to_default"`
 	AutoApply         *AutoApplyConfig `json:"auto_apply,omitempty"`
-	PolicyID          *string          `json:"policy_id,omitempty"`
 }
 
 func (e Segment) ToTF() SegmentTF {
@@ -20,7 +19,6 @@ func (e Segment) ToTF() SegmentTF {
 		Name:              types.StringValue(e.Name),
 		Selector:          types.StringValue(e.Selector),
 		FallbackToDefault: types.BoolValue(e.FallbackToDefault),
-		PolicyID:          types.StringPointerValue(e.PolicyID),
 	}
 
 	if e.AutoApply != nil {
@@ -38,20 +36,14 @@ type SegmentTF struct {
 	Selector          types.String `tfsdk:"selector"`
 	FallbackToDefault types.Bool   `tfsdk:"fallback_to_default"`
 	AutoApply         types.Object `tfsdk:"auto_apply"`
-	PolicyID          types.String `tfsdk:"policy_id"`
 }
 
 func (e SegmentTF) ToAPIReq() Segment {
-	var policyID *string = nil
-	if !e.PolicyID.IsUnknown() {
-		policyID = e.PolicyID.ValueStringPointer()
-	}
 	segment := Segment{
 		ID:                e.ID.ValueString(),
 		Name:              e.Name.ValueString(),
 		Selector:          e.Selector.ValueString(),
 		FallbackToDefault: e.FallbackToDefault.ValueBool(),
-		PolicyID:          policyID,
 	}
 
 	if !e.AutoApply.IsNull() {

@@ -202,7 +202,6 @@ func (p *AdaptiveMetricsProvider) Resources(_ context.Context) []func() resource
 		newExemptionResource,
 		newRecommendationsConfigResource,
 		newSegmentResource,
-		newPolicyResource,
 	}
 }
 
