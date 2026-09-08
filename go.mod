@@ -1,6 +1,6 @@
 module github.com/hashicorp/terraform-provider-grafana-adaptive-metrics
 
-go 1.24.3
+go 1.26.8
 
 require (
 	github.com/hashicorp/go-cleanhttp v0.5.2
