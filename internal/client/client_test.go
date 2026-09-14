@@ -175,7 +175,7 @@ func TestUpdateAggregationRecommendationsConfig(t *testing.T) {
 	defer s.close()
 
 	s.addExpected("POST", "/aggregations/recommendations/config",
-		withReqBody([]byte(`{"keep_labels":["namespace"]}`)),
+		withReqBody([]byte(`{"keep_labels":["namespace"],"auto_apply":{"enabled":false}}`)),
 	)
 
 	c, err := New(s.server.URL, &Config{})
@@ -505,7 +505,7 @@ func TestCreateSegment(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	reqBody := []byte(`{"id":"","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
+	reqBody := []byte(`{"id":"","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"auto_apply":{"enabled":false}}`)
 	respBody := []byte(`{"name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"id":"generated-ulid"}`)
 
 	s.addExpected("POST", "/aggregations/rules/segments",
@@ -562,7 +562,7 @@ func TestUpdateSegment(t *testing.T) {
 	s := newMockServer(t)
 	defer s.close()
 
-	reqBody := []byte(`{"id":"generated-ulid","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true}`)
+	reqBody := []byte(`{"id":"generated-ulid","name":"segment name","selector":"{foo=\"bar\"}","fallback_to_default":true,"auto_apply":{"enabled":false}}`)
 
 	s.addExpected("PUT", "/aggregations/rules/segments",
 		withReqBody(reqBody),

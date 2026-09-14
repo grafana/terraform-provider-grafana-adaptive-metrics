@@ -6,8 +6,8 @@ import (
 )
 
 type AggregationRecommendationConfiguration struct {
-	KeepLabels []string         `json:"keep_labels,omitempty" tfsdk:"keep_labels"`
-	AutoApply  *AutoApplyConfig `json:"auto_apply,omitempty" tfsdk:"auto_apply"`
+	KeepLabels []string        `json:"keep_labels,omitempty" tfsdk:"keep_labels"`
+	AutoApply  AutoApplyConfig `json:"auto_apply" tfsdk:"auto_apply"`
 }
 
 const (
@@ -35,11 +35,7 @@ func autoApplyAttributeTypes() map[string]attr.Type {
 	}
 }
 
-func autoApplyConfigToTF(config *AutoApplyConfig) types.Object {
-	if config == nil {
-		return types.ObjectNull(autoApplyAttributeTypes())
-	}
-
+func autoApplyConfigToTF(config AutoApplyConfig) types.Object {
 	gate := types.ObjectNull(gateAttributeTypes())
 	if config.Gate != nil {
 		gate = types.ObjectValueMust(
@@ -57,17 +53,17 @@ func autoApplyConfigToTF(config *AutoApplyConfig) types.Object {
 	)
 }
 
-func autoApplyConfigFromTF(value types.Object) *AutoApplyConfig {
+func autoApplyConfigFromTF(value types.Object) AutoApplyConfig {
 	if value.IsNull() || value.IsUnknown() {
-		return nil
+		return AutoApplyConfig{}
 	}
 
 	enabled, ok := value.Attributes()["enabled"].(types.Bool)
-	if !ok {
-		return nil
+	if !ok || enabled.IsNull() || enabled.IsUnknown() {
+		return AutoApplyConfig{}
 	}
 
-	config := &AutoApplyConfig{Enabled: enabled.ValueBool()}
+	config := AutoApplyConfig{Enabled: enabled.ValueBool()}
 	gate, ok := value.Attributes()["gate"].(types.Object)
 	if !ok || gate.IsNull() || gate.IsUnknown() {
 		return config

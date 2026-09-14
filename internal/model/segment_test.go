@@ -14,20 +14,20 @@ func TestSegment_ToTF(t *testing.T) {
 		expected SegmentTF
 	}{
 		{
-			name: "basic segment without auto_apply",
+			name: "segment without auto_apply defaults to disabled",
 			input: Segment{
 				ID:                "test-id",
 				Name:              "test-name",
 				Selector:          "{namespace=\"test\"}",
 				FallbackToDefault: true,
-				AutoApply:         nil,
+				AutoApply:         AutoApplyConfig{},
 			},
 			expected: SegmentTF{
 				ID:                types.StringValue("test-id"),
 				Name:              types.StringValue("test-name"),
 				Selector:          types.StringValue("{namespace=\"test\"}"),
 				FallbackToDefault: types.BoolValue(true),
-				AutoApply:         testNullAutoApplyObject(),
+				AutoApply:         testAutoApplyObject(false, nil),
 			},
 		},
 		{
@@ -37,7 +37,7 @@ func TestSegment_ToTF(t *testing.T) {
 				Name:              "test-name-4",
 				Selector:          "{namespace=\"dev\"}",
 				FallbackToDefault: true,
-				AutoApply:         &AutoApplyConfig{Enabled: true},
+				AutoApply:         AutoApplyConfig{Enabled: true},
 			},
 			expected: SegmentTF{
 				ID:                types.StringValue("test-id-4"),
@@ -54,7 +54,7 @@ func TestSegment_ToTF(t *testing.T) {
 				Name:              "test-name-2",
 				Selector:          "{namespace=\"prod\"}",
 				FallbackToDefault: false,
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: true,
 					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
@@ -74,7 +74,7 @@ func TestSegment_ToTF(t *testing.T) {
 				Name:              "test-name-3",
 				Selector:          "{namespace=\"staging\"}",
 				FallbackToDefault: true,
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: false,
 					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
@@ -121,7 +121,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				Name:              "test-name",
 				Selector:          "{namespace=\"test\"}",
 				FallbackToDefault: true,
-				AutoApply:         nil,
+				AutoApply:         AutoApplyConfig{},
 			},
 		},
 		{
@@ -138,7 +138,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				Name:              "test-name-4",
 				Selector:          "{namespace=\"dev\"}",
 				FallbackToDefault: true,
-				AutoApply:         &AutoApplyConfig{Enabled: true},
+				AutoApply:         AutoApplyConfig{Enabled: true},
 			},
 		},
 		{
@@ -155,7 +155,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				Name:              "test-name-2",
 				Selector:          "{namespace=\"prod\"}",
 				FallbackToDefault: false,
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: true,
 					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
@@ -175,7 +175,7 @@ func TestSegmentTF_ToAPIReq(t *testing.T) {
 				Name:              "test-name-3",
 				Selector:          "{namespace=\"staging\"}",
 				FallbackToDefault: true,
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: false,
 					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},

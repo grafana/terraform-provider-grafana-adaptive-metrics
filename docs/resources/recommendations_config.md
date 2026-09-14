@@ -23,7 +23,7 @@ resource "grafana-adaptive-metrics_recommendations_config" "singleton" {
 
 ### Optional
 
-- `auto_apply` (Attributes) Configurations related to auto-applying recommendations. (see [below for nested schema](#nestedatt--auto_apply))
+- `auto_apply` (Attributes) Configurations related to auto-applying recommendations. If omitted, auto-apply is disabled. (see [below for nested schema](#nestedatt--auto_apply))
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 
 <a id="nestedatt--auto_apply"></a>

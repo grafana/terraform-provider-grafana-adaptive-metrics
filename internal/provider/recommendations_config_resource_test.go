@@ -22,6 +22,7 @@ resource "grafana-adaptive-metrics_recommendations_config" "test" {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.#", "1"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.0", "foobar"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.enabled", "false"),
 				),
 			},
 			// Update + Read.
@@ -56,6 +57,18 @@ resource "grafana-adaptive-metrics_recommendations_config" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.1", "foobaz"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.enabled", "true"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.gate.policy", "no-increase"),
+				),
+			},
+			{
+				Config: providerConfig + `
+resource "grafana-adaptive-metrics_recommendations_config" "test" {
+	keep_labels = ["foobar", "foobaz"]
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "keep_labels.#", "2"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.enabled", "false"),
+					resource.TestCheckNoResourceAttr("grafana-adaptive-metrics_recommendations_config.test", "auto_apply.gate"),
 				),
 			},
 			// Delete happens automatically.
