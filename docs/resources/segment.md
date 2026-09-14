@@ -30,7 +30,7 @@ resource "grafana-adaptive-metrics_segment" "s1" {
 
 ### Optional
 
-- `auto_apply` (Attributes) Configurations related to auto-applying recommendations. (see [below for nested schema](#nestedatt--auto_apply))
+- `auto_apply` (Attributes) Configurations related to auto-applying recommendations. If omitted, auto-apply is disabled. (see [below for nested schema](#nestedatt--auto_apply))
 - `fallback_to_default` (Boolean) Whether to fallback to the default segment if the selector does not match any segments.
 
 ### Read-Only

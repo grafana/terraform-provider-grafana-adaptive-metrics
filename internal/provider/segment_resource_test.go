@@ -42,6 +42,7 @@ resource "grafana-adaptive-metrics_segment" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "selector", "{namespace=\"test\"}"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "true"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "false"),
 				),
 			},
 			// ImportState.
@@ -108,6 +109,21 @@ resource "grafana-adaptive-metrics_segment" "test" {
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "false"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "true"),
 					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.gate.policy", "no-increase"),
+				),
+			},
+			{
+				Config: providerConfig + `
+resource "grafana-adaptive-metrics_segment" "test" {
+	name = "test segment 2"
+	selector = "{namespace=\"test\"}"
+	fallback_to_default = false
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "name", "test segment 2"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "fallback_to_default", "false"),
+					resource.TestCheckResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.enabled", "false"),
+					resource.TestCheckNoResourceAttr("grafana-adaptive-metrics_segment.test", "auto_apply.gate"),
 				),
 			},
 			// Delete happens automatically.

@@ -14,21 +14,21 @@ func TestRecommendationConfig_ToTF(t *testing.T) {
 		expected AggregationRecommendationConfigurationTF
 	}{
 		{
-			name: "basic recommendation config without auto_apply",
+			name: "recommendation config without auto_apply defaults to disabled",
 			input: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply:  nil,
+				AutoApply:  AutoApplyConfig{},
 			},
 			expected: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
-				AutoApply:  testNullAutoApplyObject(),
+				AutoApply:  testAutoApplyObject(false, nil),
 			},
 		},
 		{
 			name: "recommendation config with auto_apply and no gate",
 			input: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply:  &AutoApplyConfig{Enabled: true},
+				AutoApply:  AutoApplyConfig{Enabled: true},
 			},
 			expected: AggregationRecommendationConfigurationTF{
 				KeepLabels: []types.String{types.StringValue("namespace"), types.StringValue("namespace2")},
@@ -39,7 +39,7 @@ func TestRecommendationConfig_ToTF(t *testing.T) {
 			name: "recommendation config with no-increase gate",
 			input: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: true,
 					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
@@ -53,7 +53,7 @@ func TestRecommendationConfig_ToTF(t *testing.T) {
 			name: "recommendation config with unbounded gate",
 			input: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: false,
 					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
@@ -88,7 +88,7 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply:  nil,
+				AutoApply:  AutoApplyConfig{},
 			},
 		},
 		{
@@ -99,7 +99,7 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply:  &AutoApplyConfig{Enabled: true},
+				AutoApply:  AutoApplyConfig{Enabled: true},
 			},
 		},
 		{
@@ -110,7 +110,7 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: true,
 					Gate:    &GateConfig{Policy: GatePolicyNoIncrease},
 				},
@@ -124,7 +124,7 @@ func TestRecommendationConfigTF_ToAPIReq(t *testing.T) {
 			},
 			expected: AggregationRecommendationConfiguration{
 				KeepLabels: []string{"namespace", "namespace2"},
-				AutoApply: &AutoApplyConfig{
+				AutoApply: AutoApplyConfig{
 					Enabled: false,
 					Gate:    &GateConfig{Policy: GatePolicyUnbounded},
 				},
