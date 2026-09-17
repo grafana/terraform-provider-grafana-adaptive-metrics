@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-grafana-adaptive-metrics/internal/client"
@@ -72,6 +74,13 @@ func (e *exemptionResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 			"metric": schema.StringAttribute{
 				Required:    true,
 				Description: "The name of the metric to be aggregated.",
+			},
+			"match_type": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("exact"),
+				Description: "How the metric matches incoming names: exact, prefix, or suffix. Defaults to exact.",
+				Validators:  []validator.String{exemptionMatchTypeValidator{}},
 			},
 			"keep_labels": schema.ListAttribute{
 				ElementType: types.StringType,
@@ -198,5 +207,16 @@ func (e *exemptionResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (e *exemptionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	parts := strings.Split(req.ID, "/")
+	if len(parts) > 2 || parts[0] == "" || (len(parts) == 2 && parts[1] == "") {
+		resp.Diagnostics.AddError("Invalid exemption import ID", "Use an exemption ID for the default segment or segment_id/exemption_id for a named segment.")
+		return
+	}
+	id := parts[0]
+	if len(parts) == 2 {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("segment"), parts[0])...)
+		id = parts[1]
+	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
+
 }

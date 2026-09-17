@@ -1,5 +1,8 @@
 ## Unreleased
 
+- [FEATURE] Preserve exact, prefix and suffix matching in exemptions.
+- [BUGFIX] Support `segment_id/exemption_id` import IDs for segmented exemptions.
+
 - [BREAKING] Default omitted auto-apply configuration to disabled.
 - [FEATURE] Add auto-apply gate policy support to segment and recommendations config resources.
 - [BREAKING] Remove the `grafana-adaptive-metrics_policy` resource and the `policy_id` field from the segment resource.
