@@ -9,6 +9,7 @@ import (
 type Exemption struct {
 	ID                     string    `json:"id"`
 	Metric                 string    `json:"metric,omitempty"`
+	MatchType              string    `json:"match_type,omitempty"`
 	KeepLabels             []string  `json:"keep_labels,omitempty"`
 	DisableRecommendations bool      `json:"disable_recommendations,omitempty"`
 	CreatedAt              time.Time `json:"created_at,omitempty"`
@@ -18,9 +19,14 @@ type Exemption struct {
 }
 
 func (e Exemption) ToTF() ExemptionTF {
+	matchType := e.MatchType
+	if matchType == "" {
+		matchType = "exact"
+	}
 	return ExemptionTF{
 		ID:                     types.StringValue(e.ID),
 		Metric:                 types.StringValue(e.Metric),
+		MatchType:              types.StringValue(matchType),
 		KeepLabels:             toTypesStringSlice(e.KeepLabels),
 		DisableRecommendations: types.BoolValue(e.DisableRecommendations),
 		CreatedAt:              types.Int64Value(e.CreatedAt.UnixMilli()),
@@ -33,6 +39,7 @@ type ExemptionTF struct {
 	Segment                types.String   `tfsdk:"segment"`
 	ID                     types.String   `tfsdk:"id"`
 	Metric                 types.String   `tfsdk:"metric"`
+	MatchType              types.String   `tfsdk:"match_type"`
 	KeepLabels             []types.String `tfsdk:"keep_labels"`
 	DisableRecommendations types.Bool     `tfsdk:"disable_recommendations"`
 	Reason                 types.String   `tfsdk:"reason"`
@@ -46,6 +53,7 @@ func (e ExemptionTF) ToAPIReq() Exemption {
 	return Exemption{
 		ID:                     e.ID.ValueString(),
 		Metric:                 e.Metric.ValueString(),
+		MatchType:              e.MatchType.ValueString(),
 		KeepLabels:             toStringSlice(e.KeepLabels),
 		DisableRecommendations: e.DisableRecommendations.ValueBool(),
 		CreatedAt:              time.UnixMilli(e.CreatedAt.ValueInt64()),

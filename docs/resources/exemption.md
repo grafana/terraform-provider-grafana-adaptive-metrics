@@ -29,6 +29,7 @@ resource "grafana-adaptive-metrics_exemption" "ex1" {
 ### Optional
 
 - `disable_recommendations` (Boolean) When set to true, the recommendations service will exempt this metric from consideration.
+- `match_type` (String) How the metric matches incoming names: exact, prefix, or suffix. Defaults to exact.
 - `keep_labels` (List of String) The array of labels to keep; labels not in this array will be aggregated.
 - `reason` (String) An optional string detailing the reason(s) for this exemption.
 - `segment` (String) The id of the segment to create an exemption for.
@@ -38,3 +39,19 @@ resource "grafana-adaptive-metrics_exemption" "ex1" {
 - `created_at` (Number) Unix timestamp of when this exemption was created.
 - `id` (String) A UILD that uniquely identifies the exemption.
 - `updated_at` (Number) Unix timestamp of when this exemption was last updated.
+
+## Import
+
+For the default segment, import using the exemption ID:
+
+```shell
+terraform import grafana-adaptive-metrics_exemption.example EXEMPTION_ID
+```
+
+For a named segment, include its ID so refresh reads the correct segment:
+
+```shell
+terraform import grafana-adaptive-metrics_exemption.example SEGMENT_ID/EXEMPTION_ID
+```
+
+A prefix or suffix exemption must also declare the matching `match_type` in configuration to preserve its behavior on subsequent plans.
