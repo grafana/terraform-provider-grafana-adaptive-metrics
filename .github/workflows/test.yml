@@ -45,7 +45,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
-      - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: '1.16.1'
           terraform_wrapper: false
@@ -98,7 +98,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
-      - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
