@@ -79,7 +79,7 @@ jobs:
   # is skipped, which still satisfies the required check.
   acceptance_test:
     name: Acceptance Tests Complete
-    if: github.event_name == 'merge_group'
+    if: github.event_name == 'merge_group' || github.event_name == 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
