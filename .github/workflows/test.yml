@@ -10,6 +10,7 @@ on:
       - main
     paths-ignore:
       - 'README.md'
+  merge_group:
 
 permissions:
   contents: read  # Testing only needs permissions to read the repository contents.
@@ -72,24 +73,24 @@ jobs:
       - run: go test -v -cover ./...
         timeout-minutes: 10
 
-  # Run acceptance tests in a matrix with Terraform CLI versions
+  # The acceptance tests share one Grafana Cloud stack and cannot run
+  # concurrently. They run only in the merge queue, which tests one merge at a
+  # time, so pull requests never compete for the stack. On other events the job
+  # is skipped, which still satisfies the required check.
   acceptance_test:
-    name: Terraform Provider Acceptance Tests
+    name: Acceptance Tests Complete
+    if: github.event_name == 'merge_group'
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
+      contents: read
       id-token: write # Needed to assume roles from Github's OIDC.
+    # Guards against a merge queue configured to build more than one entry at
+    # a time. It does not queue reliably on its own, so keep the merge queue's
+    # build concurrency at 1.
     concurrency:
       group: acceptance-tests
-    strategy:
-      max-parallel: 1
-      matrix:
-        # list whatever Terraform versions here you would like to support
-        terraform:
-          - '1.0.*'
-          - '1.15.*'
-          - '1.16.*'
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
@@ -98,29 +99,38 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: false # not strictly necessary for hardening the workflow, but caching doesn't buy us much here so we might as well turn it off
-      - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
-        with:
-          terraform_version: ${{ matrix.terraform }}
-          terraform_wrapper: false
       - uses: grafana/shared-workflows/actions/get-vault-secrets@fa48192dac470ae356b3f7007229f3ac28c48a25 # Pinned to specific commit from 25-Apr-2025
         with:
           repo_secrets: |
             GRAFANA_AM_API_URL=cloud-tests:api-url
             GRAFANA_AM_API_KEY=cloud-tests:api-key
       - run: go mod download
-      - env:
-          TF_ACC: "1"
-        run: go test -v -cover ./internal/provider/
-        timeout-minutes: 10
-
-  acceptance_test_complete:
-    name: Acceptance Tests Complete
-    if: always()
-    needs: acceptance_test
-    runs-on: ubuntu-latest
-    timeout-minutes: 1
-    steps:
-      - name: Check acceptance test result
+      # Each step uses -count=1 because Go's test cache does not notice the
+      # Terraform binary changing, and would skip the later runs.
+      - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+        with:
+          terraform_version: '1.0.*'
+          terraform_wrapper: false
+      - name: Acceptance tests (Terraform 1.0)
         env:
-          RESULT: ${{ needs.acceptance_test.result }}
-        run: test "$RESULT" = "success"
+          TF_ACC: "1"
+        run: go test -v -cover -count=1 ./internal/provider/
+        timeout-minutes: 10
+      - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+        with:
+          terraform_version: '1.15.*'
+          terraform_wrapper: false
+      - name: Acceptance tests (Terraform 1.15)
+        env:
+          TF_ACC: "1"
+        run: go test -v -cover -count=1 ./internal/provider/
+        timeout-minutes: 10
+      - uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+        with:
+          terraform_version: '1.16.*'
+          terraform_wrapper: false
+      - name: Acceptance tests (Terraform 1.16)
+        env:
+          TF_ACC: "1"
+        run: go test -v -cover -count=1 ./internal/provider/
+        timeout-minutes: 10

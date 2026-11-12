@@ -84,6 +84,8 @@ make testacc
 
 Acceptance tests expect the `GRAFANA_AM_API_URL` and `GRAFANA_AM_API_KEY` environment variables to be set.
 
+The acceptance tests share one Grafana Cloud stack, so they can't run concurrently. In CI they run only in the merge queue, one merge at a time, and not on pull requests.
+
 ### Updating documentation
 
 To generate or update documentation, run `go generate`.
