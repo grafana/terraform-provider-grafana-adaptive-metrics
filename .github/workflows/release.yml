@@ -11,6 +11,7 @@ on:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       # Needed to assume roles from Github's OIDC.
       id-token: write
