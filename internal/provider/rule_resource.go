@@ -132,6 +132,12 @@ func (r *ruleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	tf := rule.ToTF()
 
+	// The API can omit the default match type. Keep an explicit exact match in
+	// state so that the next plan does not try to write the default again.
+	if rule.MatchType == "" && state.MatchType.ValueString() == "exact" {
+		tf.MatchType = state.MatchType
+	}
+
 	// Segment tells us where to put the rule later, but isn't actually a part
 	// of the rule, so we set it separately.
 	tf.Segment = state.Segment

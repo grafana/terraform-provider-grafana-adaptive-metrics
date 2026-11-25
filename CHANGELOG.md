@@ -1,5 +1,7 @@
 ## Unreleased
 
+- [BUGFIX] Avoid recurring diffs on individual aggregation rules when the configuration sets `match_type = "exact"` and the API omits the default on refresh.
+
 ## v0.4.0
 
 - [BREAKING] Default omitted auto-apply configuration to disabled. Previously an omitted `auto_apply` block preserved the server-side value; it is now planned as `enabled = false`, so set it explicitly on any segment or recommendations config where auto-apply should stay on.
